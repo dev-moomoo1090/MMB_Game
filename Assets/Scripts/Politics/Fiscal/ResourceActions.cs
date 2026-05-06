@@ -18,7 +18,7 @@ namespace MMBGame
                 return false;
             }
 
-            targetPiece.support += System.Math.Max(1, inputValue / 10);
+            targetPiece.support += System.Math.Max(1, inputValue / System.Math.Max(1, targetPiece.taxPerTurn));
             return true;
         }
     }
@@ -36,7 +36,7 @@ namespace MMBGame
                 return false;
             }
 
-            targetPiece.support -= System.Math.Max(1, inputValue / 10);
+            targetPiece.support -= System.Math.Max(1, inputValue / System.Math.Max(1, targetPiece.taxPerTurn));
             actor.AddGold(inputValue);
             return true;
         }

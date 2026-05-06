@@ -24,6 +24,8 @@ namespace MMBGame
         private PoliticsManager politicsManager;
         private MilitaryManager militaryManager;
         private PoliticalManager politicalManager;
+        private TurnManager turnManager;
+        private BoardInteraction boardInteraction;
         private CommandActionButtonVisualFeedback visualFeedback;
         private bool isHovered;
         private bool isPressed;
@@ -37,9 +39,11 @@ namespace MMBGame
 
         private void Awake()
         {
-            politicsManager = FindObjectOfType<PoliticsManager>();
-            militaryManager = FindObjectOfType<MilitaryManager>();
-            politicalManager = FindObjectOfType<PoliticalManager>();
+            politicsManager = FindFirstObjectByType<PoliticsManager>();
+            militaryManager = FindFirstObjectByType<MilitaryManager>();
+            politicalManager = FindFirstObjectByType<PoliticalManager>();
+            turnManager = FindFirstObjectByType<TurnManager>();
+            boardInteraction = FindFirstObjectByType<BoardInteraction>();
             visualFeedback = GetComponent<CommandActionButtonVisualFeedback>();
             if (visualFeedback == null)
             {
@@ -58,6 +62,7 @@ namespace MMBGame
         {
             isHovered = true;
             visualFeedback.SetHovered(true);
+            CommandActionTooltip.Show(actionName, transform);
         }
 
         private void OnMouseExit()
@@ -69,7 +74,8 @@ namespace MMBGame
         private void OnMouseDown()
         {
             SetPressed(true);
-            Execute();
+            CommandActionTooltip.Hide();
+            HandleClick();
         }
 
         private void OnMouseUp()
@@ -84,27 +90,99 @@ namespace MMBGame
                 visualFeedback.SetHovered(false);
             }
 
+            CommandActionTooltip.Hide();
             SetPressed(false);
         }
 
         public bool Execute()
+        {
+            return ExecuteWithValue(ResolveInputValue(ResolveSelectedPiece()));
+        }
+
+        private void HandleClick()
+        {
+            if (CommandActionInputRequirements.RequiresValue(actionName))
+            {
+                CommandActionInputPrompt.Show(actionName, value => ExecuteWithValue(value));
+                return;
+            }
+
+            Execute();
+        }
+
+        private bool ExecuteWithValue(int value)
         {
             if (string.IsNullOrEmpty(actionName))
             {
                 return false;
             }
 
+            ChessPiece target = ResolveSelectedPiece();
+            PieceColor color = ResolveActorColor();
+            bool result;
+
             if (category == CommandActionCategory.Fiscal)
             {
-                return politicsManager != null && politicsManager.ExecuteFiscalAction(actionName, selectedPiece, inputValue);
+                result = politicsManager != null && politicsManager.ExecuteFiscalAction(actionName, target, value);
+                RefreshProfileIfNeeded(result);
+                return result;
             }
 
             if (category == CommandActionCategory.Military)
             {
-                return militaryManager != null && militaryManager.ExecuteMilitaryAction(actionName, selectedPiece, targetFile, targetRank, actorColor);
+                result = militaryManager != null && militaryManager.ExecuteMilitaryAction(actionName, target, targetFile, targetRank, color);
+                RefreshProfileIfNeeded(result);
+                return result;
             }
 
-            return politicalManager != null && politicalManager.ExecutePoliticalAction(actionName, selectedPiece, actorColor, inputValue);
+            result = politicalManager != null && politicalManager.ExecutePoliticalAction(actionName, target, color, value);
+            RefreshProfileIfNeeded(result);
+            return result;
+        }
+
+        private ChessPiece ResolveSelectedPiece()
+        {
+            if (selectedPiece != null)
+            {
+                return selectedPiece;
+            }
+
+            if (boardInteraction == null)
+            {
+                boardInteraction = FindFirstObjectByType<BoardInteraction>();
+            }
+
+            return boardInteraction != null ? boardInteraction.SelectedPiece : null;
+        }
+
+        private PieceColor ResolveActorColor()
+        {
+            if (turnManager == null)
+            {
+                turnManager = FindFirstObjectByType<TurnManager>();
+            }
+
+            if (turnManager != null && turnManager.CurrentColor != PieceColor.None)
+            {
+                return turnManager.CurrentColor;
+            }
+
+            return actorColor;
+        }
+
+        private int ResolveInputValue(ChessPiece target)
+        {
+            if (inputValue > 0)
+            {
+                return inputValue;
+            }
+
+            if (target != null)
+            {
+                return Mathf.Max(1, target.taxPerTurn);
+            }
+
+            return 10;
         }
 
         private void UpdatePointerState()
@@ -128,11 +206,16 @@ namespace MMBGame
             {
                 isHovered = containsPointer;
                 visualFeedback.SetHovered(isHovered);
+                if (isHovered)
+                {
+                    CommandActionTooltip.Show(actionName, transform);
+                }
             }
 
             if (containsPointer && mouse.leftButton.wasPressedThisFrame)
             {
                 SetPressed(true);
+                CommandActionTooltip.Hide();
             }
 
             if (isPressed && !mouse.leftButton.isPressed)
@@ -153,6 +236,21 @@ namespace MMBGame
             {
                 visualFeedback.SetPressed(pressed);
             }
+        }
+
+        private void RefreshProfileIfNeeded(bool actionResult)
+        {
+            if (!actionResult)
+            {
+                return;
+            }
+
+            if (boardInteraction == null)
+            {
+                boardInteraction = FindFirstObjectByType<BoardInteraction>();
+            }
+
+            boardInteraction?.RefreshSelectionProfile();
         }
     }
 }

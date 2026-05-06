@@ -34,7 +34,7 @@ namespace MMBGame
                 ChessPiece piece = pieces[i];
                 if (piece != null && piece.color == enemyColor)
                 {
-                    piece.support -= Math.Max(1, piece.support / 10);
+                    piece.support -= Math.Max(1, (100 - piece.support) / 40);
                 }
             }
 

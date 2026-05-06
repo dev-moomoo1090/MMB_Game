@@ -2,10 +2,8 @@
 
 ## Current Goal
 - Continue Unity work for `C:\GitHub\MMB_Game`.
-- User wants two next changes:
-  - Check whether piece click/move interaction exists; implement if missing.
-  - Change initial chess piece layout from left/right orientation to top/bottom orientation.
-- Use Unity MCP after restart to verify in the actual scene and Game View.
+- Latest user request: fix actual play-flow issues found by user verification.
+- Politics-phase movement blocking, button action application, profile refresh, and value input prompt are complete.
 
 ## Important Project Rules
 - Read `AGENTS.md` before work.
@@ -14,128 +12,175 @@
 - No code comments.
 - Keep all script files at or below 300 lines.
 - Manager classes should coordinate only; put feature logic in focused files.
-- Do not modify files outside the requested scope.
 - After changes, update `AGENTS.md` component connection/completion sections.
+- Do not revert unrelated user changes.
 
-## Current Scene Setup
-- Scene: `Assets/SampleGame.unity`.
-- Scene object exists and was saved through Unity MCP:
-  - `Managers/PieceSetupManager`
-  - Component: `BoardPieceSetupManager`
-- `BoardManager` references `PieceSetupManager` via serialized `pieceSetupManager`.
-- Edit piece setup in Unity Inspector at:
-  - `Managers > PieceSetupManager > BoardPieceSetupManager > pieceDefinitions`
+## Unity MCP State
+- Unity MCP is connected.
+- Active scene verified: `Assets/SampleGame.unity`.
+- Script compilation passed with 0 script errors.
+- The only remaining console error observed is unrelated to this work:
+  - Coplay custom main toolbar element uses an unsupported Unity toolbar method.
 
-## Current Script Structure
-- `Assets/Scripts/Chess/Board/BoardManager.cs`
-  - Coordinates board state, move attempts, obstacle placement, rear/front deploy, result checks.
-  - Finds or creates `BoardPieceSetupManager` if reference is missing.
-  - Calls setup manager for piece setup, promotion setup, and visual refresh.
-- `Assets/Scripts/Chess/Board/BoardPieceSetupManager.cs`
-  - Owns `pieceDefinitions`.
-  - Applies initial support, tax, base move patterns, and side resolution to pieces.
-  - Syncs visuals through `BoardPieceVisuals`.
-  - Has context menu `Fill Default Piece Definitions`.
-  - Has context menu `Assign Missing Prefab References`.
-  - Auto-fills empty definitions and assigns missing prefab references in editor using delayed calls.
-  - Missing prefab references fall back to same-color pawn prefabs.
-- `Assets/Scripts/Chess/Board/BoardPieceVisuals.cs`
-  - Spawns prefabs or sprites at board tile positions.
-  - Prefab is preferred over sprite.
-  - Runtime visual scale is currently `0.55`.
-  - Piece model bottom-center is aligned to tile center, so pieces stand on the tile instead of centering their body on the tile.
-  - Uses selected prefab/sprite when a piece visual is selected.
+## Verification Complete
+1. Confirmed Unity MCP connection.
+2. Confirmed active scene: `Assets/SampleGame.unity`.
+3. Refreshed scripts and requested Unity compilation.
+4. Confirmed 0 script compile errors in the Unity console.
+5. Entered Play Mode.
+6. Verified all 18 political action buttons execute through `CommandActionButton.Execute()` into `PoliticalManager`:
+   - `정찰`, `제후국`, `심문`, `매수`, `정보`
+   - `배신 - 접촉`, `배신 - 정보`, `배신 - 실책`, `배신 - 파벌`, `배신 - 암살`
+   - `암살`, `선전`, `대민지원`, `방문`, `벌금`, `처형`, `선동`, `여론조작`
+7. Verified `SpecialTax` hover tooltip creates the expected text:
+   - `조건 : 없음`
+   - `기능 : 선택된 기물의 턴 당 세금 +100%, 지지도 +5`
+8. Verified tooltip box is `8.4 x 1.8`, text font size is `44`, and tooltip hover collider matches the enlarged box.
+9. Verified tooltip hides after `CommandActionTooltip.Hide()`.
+10. Verified bottom-left `TurnStatusDisplay` updates:
+   - initial: `백 정치 턴`
+   - after phase end: `백 체스 턴`
+   - after next phase end: `흑 정치 턴`
+11. Verified politics-phase movement is blocked through `BoardManager.TryMove`.
+12. Verified `SpecialTaxButton` is connected and changes selected piece data.
+13. Verified selected profile support text refreshes after piece data changes.
+14. Verified value-required action flow:
+   - click `AidActionButton`
+   - input prompt appears
+   - submit value
+   - prompt hides
+   - action applies to selected piece
+15. Exited Play Mode.
+
+## Build Verification Attempt
+- `dotnet build MMB_Game.slnx` was attempted.
+- First attempt failed because sandbox could not write to `C:\Users\hyuns\.dotnet`.
+- Second attempt with `DOTNET_CLI_HOME=C:\GitHub\MMB_Game\.dotnet_home` reached MSBuild but failed because Unity-generated project files are missing:
+  - `Assembly-CSharp.csproj`
+  - `Assembly-CSharp-Editor.csproj`
+- Therefore real compile verification must be done through Unity after MCP reconnect.
+- A `.dotnet_home` folder was created by that attempt. It is not needed; user denied deletion. Leave it unless user asks cleanup.
+
+## Files Changed For Latest Request
+- `Assets/SampleGame.unity`
+- `Assets/Scripts/Chess/Board/BoardInteraction.cs`
 - `Assets/Scripts/Chess/Board/BoardPieceVisual.cs`
-  - Handles clickable runtime piece visual and selected visual state only.
-  - It does not yet appear to implement actual move destination selection or move execution.
 - `Assets/Scripts/UI/CommandActionButton.cs`
-  - Handles command action execution and pointer press/hover state.
-- `Assets/Scripts/UI/CommandActionButtonVisualFeedback.cs`
-  - Handles text-sized collider, text outline hover, and press color feedback.
+- `Assets/Scripts/UI/CommandActionInputPrompt.cs`
+- `Assets/Scripts/UI/CommandActionInputPrompt.cs.meta`
+- `Assets/Scripts/UI/CommandActionInputRequirements.cs`
+- `Assets/Scripts/UI/CommandActionInputRequirements.cs.meta`
+- `Assets/Scripts/UI/CommandActionTooltip.cs`
+- `Assets/Scripts/UI/CommandActionTooltip.cs.meta`
+- `Assets/Scripts/UI/CommandActionTooltipDescriptions.cs`
+- `Assets/Scripts/UI/CommandActionTooltipDescriptions.cs.meta`
+- `Assets/Scripts/UI/TurnStatusDisplay.cs`
+- `Assets/Scripts/UI/TurnStatusDisplay.cs.meta`
+- `Assets/Scripts/Politics/Fiscal/TaxActions.cs`
+- `Assets/Scripts/Politics/Fiscal/ResourceActions.cs`
+- `Assets/Scripts/Politics/Military/MilitaryManager.cs`
+- `Assets/Scripts/Politics/Military/RoadPlanAction.cs`
+- `Assets/Scripts/Politics/Military/RoadPlanAction.cs.meta`
+- `Assets/Scripts/Politics/Political/PoliticalManager.cs`
+- `Assets/Scripts/Politics/Political/ReconAction.cs`
+- `Assets/Scripts/Politics/Political/PropagandaAction.cs`
+- `Assets/Scripts/Politics/Political/AgitationAction.cs`
+- `Assets/Scripts/Politics/Political/CivilAidAction.cs`
+- `Assets/Scripts/Politics/Political/ManipulationAction.cs`
+- `Assets/Scripts/Politics/Political/FeudalStateAction.cs`
+- `Assets/Scripts/Politics/Political/BribeAction.cs`
+- `Assets/Scripts/Politics/Political/BetrayalActions.cs`
+- `Assets/Scripts/Politics/Political/BetrayalActions.cs.meta`
+- `Assets/Scripts/Chess/Board/BoardState.cs`
+- `Assets/Scripts/Chess/Movement/MoveGenerator.cs`
+- `Assets/Scripts/Chess/Movement/SpecialMoves.cs`
+- `AGENTS.md`
+- `CODEX_HANDOFF.md`
 
-## Work Completed In Latest Session
-- Unity MCP became available after restart and was used successfully.
-- Created `Managers/PieceSetupManager` in the loaded scene when it was missing from the editor instance.
-- Added `BoardPieceSetupManager` component and connected `BoardManager.pieceSetupManager`.
-- Saved `Assets/SampleGame.unity`.
-- Added automatic default piece definitions when `pieceDefinitions` is empty.
-- Added editor-side missing prefab assignment.
-- Added same-color pawn prefab fallback for missing piece prefabs.
-- Manually filled remaining Black queenside null prefab slots in Unity MCP:
-  - Black queenside rook fallback: `Black_Pawn_Queenside`
-  - Black queenside knight fallback: `Black_Pawn_Queenside`
-  - Black queenside bishop fallback: `Black_Bishop_Kingside` or fallback depending current scene serialization; recheck after restart.
-- Adjusted piece visual scale from `1.0` to `0.55`.
-- Adjusted placement so the visual model's bottom-center aligns with the tile center.
-- Updated `AGENTS.md` to mention the prefab/position/scale correction.
+## Latest Implementation Summary
+- UI/Button connection:
+  - `CommandActionButton` now resolves current turn color from `TurnManager`.
+  - `CommandActionButton` now resolves the currently selected board piece through `BoardInteraction`.
+  - `CommandActionButton` now supplies a positive fallback input value when a button has no serialized value.
+  - `CommandActionButton` now opens `CommandActionInputPrompt` for value-required actions before applying the action.
+  - `CommandActionInputPrompt` captures numeric keyboard input, applies on Enter, cancels on Esc, and hides after submit.
+  - `CommandActionInputRequirements` lists actions that need numeric input.
+  - `BoardInteraction` now blocks movement during non-chess phases while preserving piece selection/profile viewing.
+  - `BoardInteraction` refreshes selected move indicators/profile after action and phase events.
+  - `BoardManager.TryMove` now rejects movement outside ChessPhase.
+  - `CommandActionButton` now shows `CommandActionTooltip` on hover and hides it on hover exit/click.
+  - `BoardPieceVisual` keeps a reference to its `ChessPiece`.
+  - `BoardInteraction` exposes the currently selected `ChessPiece`.
+  - `CommandActionTooltip` creates a larger transparent grey background with smaller white text and includes condition/cost/effect descriptions for command actions.
+  - `CommandActionTooltip` keeps hover active over the tooltip box and supports mouse-wheel scrolling for overflow text.
+  - `CommandActionTooltipDescriptions` stores the command description text separately so tooltip code stays under 300 lines.
+  - `TurnStatusDisplay` anchors to the bottom-left camera viewport and shows current color/phase.
+  - `TurnStatusDisplay` subscribes to `EventBus.OnTurnChanged` and `EventBus.OnPhaseChanged`.
+  - Added missing political buttons to `Assets/SampleGame.unity`:
+    - `방문`
+    - `배신 - 접촉`
+    - `배신 - 정보`
+    - `배신 - 실책`
+    - `배신 - 파벌`
+    - `배신 - 암살`
+- Fiscal:
+  - 특세 now doubles tax for one turn and adds support +5.
+  - 감면 now exempts tax for one turn and subtracts support -5.
+  - 지원/징발 now scale support by `inputValue / target.taxPerTurn`.
+- Military:
+  - Added `RoadPlanAction`.
+  - `MilitaryManager` now registers `RoadPlanAction`.
+  - `BoardState` now stores one active road endpoint pair.
+  - `MoveGenerator` adds road movement between road endpoints.
+  - `SpecialMoves` clears the road after it is used.
+- Political:
+  - 정찰 now publishes the opponent’s last 3 actions.
+  - 선전 changed to support +`currentSupport / 20`.
+  - 선동 changed to support -`(100 - currentSupport) / 40`.
+  - 대민지원 changed to allied-wide support +`ceil(value / (sumBaseTax / 2))`.
+  - 여론조작 changed to allied-wide support -`ceil(value / (sumBaseTax / 3))`.
+  - 제후국 now spends `value * 3`, applies 3 rebellion checks, and adds `value / taxPerTurn` rebellion weight.
+  - 매수 now spends `value * 3` and runs 3 betrayal checks.
+  - Added 배신 하위 행동:
+    - `배신 - 접촉`
+    - `배신 - 정보`
+    - `배신 - 실책`
+    - `배신 - 파벌`
+    - `배신 - 암살`
 
-## Visual Verification
-- Game View screenshots were captured:
-  - `Assets/Screenshots/codex_game_view_piece_size_before.png`
-  - `Assets/Screenshots/codex_game_view_piece_size_after_055.png`
-  - `Assets/Screenshots/codex_game_view_piece_offset_y0.png`
-  - `Assets/Screenshots/codex_game_view_piece_tile_bounds_center.png`
-  - `Assets/Screenshots/codex_game_view_piece_feet_center.png`
-- Best current screenshot:
-  - `Assets/Screenshots/codex_game_view_piece_feet_center.png`
-- User observed pieces were not centered on board tiles.
-- Fix applied: model bottom-center now aligns to tile center.
-- Recheck visually after Unity/MCP restart.
+## Notes About Action API Limitations
+- Current `CommandActionButton`/manager APIs support one selected piece, one value, and one target coordinate pair.
+- `RoadPlanAction` uses selected piece as endpoint A and `targetFile/targetRank` as endpoint B.
+- `배신 - 암살` currently uses the betrayed selected enemy as assassin and automatically chooses a same-color non-betrayed victim that the assassin can reach. There is no second explicit target in the existing API yet.
+- These are functional implementations within the current architecture, but UI may need follow-up if the user wants two-click target selection for road/victim selection.
 
-## Prefab Naming / Typo State
-- User requested not to tolerate typo in code.
-- Prefab filenames were renamed from `Kingnside` to `Kingside`.
-- Internal prefab `m_Name` values were also changed.
-- Search previously verified no old typo matches in actual `Assets` project content, except explanatory text in this handoff may mention the old typo.
+## Existing Pre-Latest Work Context
+- Board coordinate mapping was changed so logical tiles use `Tile_a1` through `Tile_h8`.
+- White is at the bottom/player side in the current visual orientation.
+- User-specified corner remap was implemented:
+  - old `h1 -> a1`
+  - old `h8 -> a8`
+  - old `a1 -> h1`
+  - old `a8 -> h8`
+- Initial placement was rotated:
+  - White back rank on file `a`, white pawns on file `b`.
+  - Black back rank on file `h`, black pawns on file `g`.
+- Piece click interaction was added through `BoardInteraction`.
+- Legal move indicators were added through `BoardMoveIndicators`:
+  - empty legal moves: translucent white circles
+  - captures: translucent grey circles
+- Piece profile display was added through `BoardPieceProfileDisplay`.
 
-## Current Git State Notes
-- One commit already exists:
-  - `163a0f1 Add Unity project and board piece setup`
-- Push failed earlier because GitHub remote returned repository not found:
-  - `https://github.com/dev-moomoo1090/MMB_Game.git`
-- Current uncommitted changes include, at minimum:
-  - `AGENTS.md`
-  - `Assets/SampleGame.unity`
-  - `Assets/Scripts/Chess/Board/BoardManager.cs`
-  - `Assets/Scripts/Chess/Board/BoardPieceSetupManager.cs`
-  - `Assets/Scripts/Chess/Board/BoardPieceVisuals.cs`
-  - `Assets/Scripts/UI/CommandActionButton.cs`
-  - `Assets/Scripts/UI/CommandActionButtonVisualFeedback.cs`
-  - Black prefab renames from old typo spelling to `Kingside`
-  - Screenshot files under `Assets/Screenshots/`
-  - `CODEX_HANDOFF.md`
-- Do not stage/commit unless user asks.
+## AGENTS.md Update Status
+- `AGENTS.md` was updated for:
+  - `BoardState` road state relationship.
+  - `MilitaryAction` references including `MovePattern`.
+  - `PoliticalAction` references including `MoveGenerator` and `SpecialMoves`.
+  - Completion section for 2026-05-06 political-action document implementation.
 
-## Verification Already Done
-- Unity compile check after latest script edits: no compile errors.
-- All `Assets/Scripts/**/*.cs` files were checked and were at or below 300 lines.
-- Play mode was run multiple times.
-- Current expected unrelated console error:
-  - Unity/Coplay toolbar error about unsupported custom elements in Unity main toolbar.
-  - This appears unrelated to the game scripts.
-
-## Current Unity MCP State
-- At the end of the session, Unity MCP became inaccessible:
-  - Request failed to `http://127.0.0.1:8080/mcp`.
-- User plans to restart Unity/MCP.
-- After restart, first check MCP with:
-  - `mcpforunity://editor/state`
-  - `read_console`
-  - `find_gameobjects` for `PieceSetupManager` and `BoardManager`
-
-## Next Recommended Steps After Restart
-1. Confirm Unity MCP is connected.
-2. Confirm active scene is `Assets/SampleGame.unity`.
-3. Confirm `Managers/PieceSetupManager` exists.
-4. Confirm `BoardManager.pieceSetupManager` is not null.
-5. Enter Play Mode and capture Game View.
-6. Recheck piece foot alignment on board tiles.
-7. Investigate piece click/move flow:
-   - `BoardPieceVisual` currently handles selection visuals.
-   - Determine whether any tile click or move-selection component exists.
-   - If missing, add a focused board interaction component rather than bloating `BoardManager`.
-8. Change initial layout from left/right orientation to top/bottom orientation:
-   - Inspect `BoardManager.SetupInitialPosition()`.
-   - Current setup likely uses files/ranks in a way that appears side-by-side in the isometric board.
-   - Adjust initial coordinates so opposing armies occupy top and bottom sides in Game View.
-   - Verify with Unity MCP screenshot.
+## Suggested Next Response After Verification
+- If Unity console has no compile errors, tell the user:
+  - Implementation is complete.
+  - MCP compile check passed.
+  - Mention any runtime smoke-test result.
+- If errors appear, fix up to two rounds, then report exact errors and attempted fixes.

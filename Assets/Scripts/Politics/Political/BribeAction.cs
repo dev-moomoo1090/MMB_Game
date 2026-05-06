@@ -16,19 +16,23 @@ namespace MMBGame
             }
 
             PlayerState actor = manager.GetActorState(actorColor);
-            if (actor == null || !actor.SpendGold(value))
+            if (actor == null || !actor.SpendGold(value * 3))
             {
                 return false;
             }
 
-            int chance = Math.Max(5, value + (100 - target.support) + target.acceptWeight - target.taxPerTurn * 5);
-            if (UnityEngine.Random.Range(0, 100) >= chance)
+            int bonus = Math.Max(1, value / Math.Max(1, target.taxPerTurn));
+            int chance = Math.Max(5, bonus + (100 - target.support) + target.acceptWeight - target.taxPerTurn * 5);
+            for (int i = 0; i < 3; i++)
             {
-                return false;
+                if (UnityEngine.Random.Range(0, 100) < chance)
+                {
+                    target.isBetrayed = true;
+                    return true;
+                }
             }
 
-            target.isBetrayed = true;
-            return true;
+            return false;
         }
     }
 }

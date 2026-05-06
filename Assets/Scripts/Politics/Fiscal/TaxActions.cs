@@ -14,6 +14,7 @@ namespace MMBGame
             }
 
             targetPiece.taxModifier = 2;
+            targetPiece.support += 5;
             return true;
         }
     }
@@ -32,6 +33,7 @@ namespace MMBGame
             }
 
             targetPiece.taxModifier = 0;
+            targetPiece.support -= 5;
             return true;
         }
     }

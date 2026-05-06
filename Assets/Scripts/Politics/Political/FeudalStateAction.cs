@@ -17,16 +17,21 @@ namespace MMBGame
             }
 
             PlayerState actor = manager.GetActorState(actorColor);
-            if (actor == null || !actor.SpendGold(value))
+            if (actor == null || !actor.SpendGold(value * 3))
             {
                 return false;
             }
 
-            float chance = Mathf.Clamp((20 - target.support) * 1.5f + value / Math.Max(1, target.taxPerTurn), 0f, 90f);
-            target.rebellionWeight += value / 10f;
-            if (UnityEngine.Random.Range(0f, 100f) < chance)
+            float bonus = value / Math.Max(1f, target.taxPerTurn);
+            target.rebellionWeight += bonus;
+            float chance = Mathf.Clamp((20 - target.support) * 1.5f + bonus, 0f, 90f);
+            for (int i = 0; i < 3; i++)
             {
-                EventBus.Instance.PublishRebellionTriggered(target);
+                if (UnityEngine.Random.Range(0f, 100f) < chance)
+                {
+                    EventBus.Instance.PublishRebellionTriggered(target);
+                    return true;
+                }
             }
 
             return true;

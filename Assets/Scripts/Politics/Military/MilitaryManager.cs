@@ -17,6 +17,7 @@ namespace MMBGame
             pendingEffects.Clear();
             militaryActions.Clear();
             militaryActions.Add(new BarricadeAction());
+            militaryActions.Add(new RoadPlanAction());
             militaryActions.Add(new TrebuchetAction());
             militaryActions.Add(new BombardAction());
             militaryActions.Add(new OutpostAction());

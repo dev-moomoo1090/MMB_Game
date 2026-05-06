@@ -18,7 +18,22 @@ namespace MMBGame
                 GenerateKingMoves(state, piece, moves);
             else
                 GeneratePatternMoves(state, piece, moves);
+            GenerateRoadMoves(state, piece, moves);
             return moves;
+        }
+
+        private static void GenerateRoadMoves(BoardState state, ChessPiece piece, List<Move> moves)
+        {
+            if (!state.TryGetRoadDestination(piece.file, piece.rank, out int targetFile, out int targetRank))
+            {
+                return;
+            }
+
+            ChessPiece target = state.GetPiece(targetFile, targetRank);
+            if (target == null || (!IsObstacle(target) && target.color != piece.color))
+            {
+                moves.Add(new Move(piece.file, piece.rank, targetFile, targetRank));
+            }
         }
 
         private static void GeneratePatternMoves(BoardState state, ChessPiece piece, List<Move> moves)

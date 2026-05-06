@@ -10,6 +10,9 @@ namespace MMBGame
         private BoardMoveIndicators moveIndicators;
         private BoardPieceProfileDisplay profileDisplay;
         private BoardPieceVisual selectedVisual;
+        private TurnManager turnManager;
+
+        public ChessPiece SelectedPiece => selectedVisual != null ? selectedVisual.Piece : null;
 
         public void Initialize(BoardPieceVisuals newPieceVisuals)
         {
@@ -19,8 +22,25 @@ namespace MMBGame
                 boardManager = FindFirstObjectByType<BoardManager>();
             }
 
+            if (turnManager == null)
+            {
+                turnManager = FindFirstObjectByType<TurnManager>();
+            }
+
             EnsureMoveIndicators();
             EnsureProfileDisplay();
+        }
+
+        private void OnEnable()
+        {
+            EventBus.Instance.OnActionExecuted += HandleActionExecuted;
+            EventBus.Instance.OnPhaseChanged += HandlePhaseChanged;
+        }
+
+        private void OnDisable()
+        {
+            EventBus.Instance.OnActionExecuted -= HandleActionExecuted;
+            EventBus.Instance.OnPhaseChanged -= HandlePhaseChanged;
         }
 
         public void ClearSelection()
@@ -94,6 +114,11 @@ namespace MMBGame
                 return false;
             }
 
+            if (!IsChessPhase())
+            {
+                return false;
+            }
+
             if (boardManager == null)
             {
                 boardManager = FindFirstObjectByType<BoardManager>();
@@ -122,6 +147,16 @@ namespace MMBGame
         {
             EnsureBoardManager();
             EnsureMoveIndicators();
+            if (!IsChessPhase())
+            {
+                if (moveIndicators != null)
+                {
+                    moveIndicators.Hide();
+                }
+
+                return;
+            }
+
             if (moveIndicators != null)
             {
                 moveIndicators.Show(boardManager, selectedVisual);
@@ -144,6 +179,42 @@ namespace MMBGame
             {
                 boardManager = FindFirstObjectByType<BoardManager>();
             }
+        }
+
+        public void RefreshSelectionProfile()
+        {
+            if (selectedVisual == null)
+            {
+                return;
+            }
+
+            ShowSelectedMoves();
+            ShowSelectedProfile();
+        }
+
+        private void HandleActionExecuted(PieceColor color, string actionName)
+        {
+            RefreshSelectionProfile();
+        }
+
+        private void HandlePhaseChanged(GamePhase phase)
+        {
+            if (phase != GamePhase.ChessPhase && moveIndicators != null)
+            {
+                moveIndicators.Hide();
+            }
+
+            RefreshSelectionProfile();
+        }
+
+        private bool IsChessPhase()
+        {
+            if (turnManager == null)
+            {
+                turnManager = FindFirstObjectByType<TurnManager>();
+            }
+
+            return turnManager != null && turnManager.CurrentPhase == GamePhase.ChessPhase;
         }
 
         private void EnsureMoveIndicators()

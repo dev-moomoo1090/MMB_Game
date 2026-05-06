@@ -34,12 +34,13 @@ namespace MMBGame
                 return true;
             }
 
+            int supportGain = Math.Max(1, (int)Math.Ceiling(value / Math.Max(1f, totalTax * 0.5f)));
             for (int i = 0; i < pieces.Count; i++)
             {
                 ChessPiece piece = pieces[i];
                 if (piece != null && piece.color == actorColor)
                 {
-                    piece.support += Math.Max(1, value * Math.Max(1, piece.taxPerTurn) / totalTax);
+                    piece.support += supportGain;
                 }
             }
 

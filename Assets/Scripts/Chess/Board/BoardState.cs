@@ -17,6 +17,11 @@ namespace MMBGame
         public List<Move> moveHistory;
         public Dictionary<string, int> positionHistory;
         public List<ChessPiece> offBoardPieces;
+        public bool roadActive;
+        public int roadAFile;
+        public int roadARank;
+        public int roadBFile;
+        public int roadBRank;
 
         public BoardState()
         {
@@ -33,6 +38,7 @@ namespace MMBGame
             moveHistory = new List<Move>();
             positionHistory = new Dictionary<string, int>();
             offBoardPieces = new List<ChessPiece>();
+            ClearRoad();
         }
 
         public ChessPiece GetPiece(int file, int rank)
@@ -109,6 +115,56 @@ namespace MMBGame
             return pieces;
         }
 
+        public void SetRoad(int firstFile, int firstRank, int secondFile, int secondRank)
+        {
+            roadActive = true;
+            roadAFile = firstFile;
+            roadARank = firstRank;
+            roadBFile = secondFile;
+            roadBRank = secondRank;
+        }
+
+        public void ClearRoad()
+        {
+            roadActive = false;
+            roadAFile = -1;
+            roadARank = -1;
+            roadBFile = -1;
+            roadBRank = -1;
+        }
+
+        public bool IsRoadEndpoint(int file, int rank)
+        {
+            return roadActive &&
+                ((roadAFile == file && roadARank == rank) || (roadBFile == file && roadBRank == rank));
+        }
+
+        public bool TryGetRoadDestination(int file, int rank, out int targetFile, out int targetRank)
+        {
+            targetFile = -1;
+            targetRank = -1;
+            if (!roadActive)
+            {
+                return false;
+            }
+
+            if (roadAFile == file && roadARank == rank)
+            {
+                targetFile = roadBFile;
+                targetRank = roadBRank;
+                return true;
+            }
+
+            if (roadBFile == file && roadBRank == rank)
+            {
+                targetFile = roadAFile;
+                targetRank = roadARank;
+                return true;
+            }
+
+            return false;
+        }
+
         public BoardState Clone()
         {
             var clone = new BoardState();
@@ -129,6 +185,15 @@ namespace MMBGame
             clone.moveHistory = new List<Move>(moveHistory);
             clone.positionHistory = new Dictionary<string, int>(positionHistory);
             clone.offBoardPieces = new List<ChessPiece>();
+            if (roadActive)
+            {
+                clone.SetRoad(roadAFile, roadARank, roadBFile, roadBRank);
+            }
+            else
+            {
+                clone.ClearRoad();
+            }
+
             for (int i = 0; i < offBoardPieces.Count; i++)
             {
                 clone.offBoardPieces.Add(offBoardPieces[i].Clone());

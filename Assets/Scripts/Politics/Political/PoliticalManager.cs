@@ -7,6 +7,7 @@ namespace MMBGame
     {
         private readonly List<PoliticalAction> politicalActions = new List<PoliticalAction>();
         private readonly Dictionary<PieceColor, string> lastActions = new Dictionary<PieceColor, string>();
+        private readonly Dictionary<PieceColor, List<string>> recentActions = new Dictionary<PieceColor, List<string>>();
         private BoardManager boardManager;
         private PoliticsManager politicsManager;
 
@@ -17,12 +18,18 @@ namespace MMBGame
             boardManager = FindObjectOfType<BoardManager>();
             politicsManager = FindObjectOfType<PoliticsManager>();
             lastActions.Clear();
+            recentActions.Clear();
             politicalActions.Clear();
             politicalActions.Add(new ReconAction());
             politicalActions.Add(new FeudalStateAction());
             politicalActions.Add(new InterrogationAction());
             politicalActions.Add(new BribeAction());
             politicalActions.Add(new IntelAction());
+            politicalActions.Add(new BetrayalContactAction());
+            politicalActions.Add(new BetrayalInfoAction());
+            politicalActions.Add(new BetrayalBlunderAction());
+            politicalActions.Add(new BetrayalFactionAction());
+            politicalActions.Add(new BetrayalAssassinationAction());
             politicalActions.Add(new AssassinationAction());
             politicalActions.Add(new PropagandaAction());
             politicalActions.Add(new CivilAidAction());
@@ -65,6 +72,17 @@ namespace MMBGame
             return null;
         }
 
+        public string GetRecentOpponentActions(PieceColor myColor)
+        {
+            PieceColor opponent = myColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
+            if (!recentActions.TryGetValue(opponent, out List<string> actions) || actions.Count == 0)
+            {
+                return null;
+            }
+
+            return string.Join(", ", actions);
+        }
+
         public bool ExecutePoliticalAction(string actionName, ChessPiece target, PieceColor actorColor, int value = 0)
         {
             PoliticalAction action = null;
@@ -104,6 +122,17 @@ namespace MMBGame
         private void HandleActionExecuted(PieceColor color, string actionName)
         {
             lastActions[color] = actionName;
+            if (!recentActions.TryGetValue(color, out List<string> actions))
+            {
+                actions = new List<string>();
+                recentActions[color] = actions;
+            }
+
+            actions.Insert(0, actionName);
+            while (actions.Count > 3)
+            {
+                actions.RemoveAt(actions.Count - 1);
+            }
         }
 
         private void HandleTurnChanged(PieceColor color)

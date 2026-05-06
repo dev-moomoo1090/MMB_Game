@@ -16,7 +16,6 @@ namespace MMBGame
                 return false;
             }
 
-            PieceColor enemyColor = actorColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
             BoardState state = manager.BoardManager.BoardState;
             int totalTax = 0;
             System.Collections.Generic.List<ChessPiece> pieces = state.GetAllPieces();
@@ -24,7 +23,7 @@ namespace MMBGame
             for (int i = 0; i < pieces.Count; i++)
             {
                 ChessPiece piece = pieces[i];
-                if (piece != null && piece.color == enemyColor)
+                if (piece != null && piece.color == actorColor)
                 {
                     totalTax += Math.Max(1, piece.taxPerTurn);
                 }
@@ -35,12 +34,13 @@ namespace MMBGame
                 return true;
             }
 
+            int supportPenalty = Math.Max(1, (int)Math.Ceiling(value / Math.Max(1f, totalTax / 3f)));
             for (int i = 0; i < pieces.Count; i++)
             {
                 ChessPiece piece = pieces[i];
-                if (piece != null && piece.color == enemyColor)
+                if (piece != null && piece.color == actorColor)
                 {
-                    piece.support -= Math.Max(1, value * Math.Max(1, piece.taxPerTurn) / totalTax);
+                    piece.support -= supportPenalty;
                 }
             }
 

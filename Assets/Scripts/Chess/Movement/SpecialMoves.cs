@@ -19,8 +19,19 @@ namespace MMBGame
                 default:                                PlacePiece(state, piece, move.toFile, move.toRank); break;
             }
             piece.hasMoved = true;
+            ClearRoadIfUsed(state, move);
             state.currentTurn = state.currentTurn == PieceColor.White ? PieceColor.Black : PieceColor.White;
             state.moveHistory.Add(move);
+        }
+
+        private static void ClearRoadIfUsed(BoardState state, Move move)
+        {
+            if (!state.IsRoadEndpoint(move.fromFile, move.fromRank) || !state.IsRoadEndpoint(move.toFile, move.toRank))
+            {
+                return;
+            }
+
+            state.ClearRoad();
         }
 
         private static void PlacePiece(BoardState state, ChessPiece piece, int file, int rank)

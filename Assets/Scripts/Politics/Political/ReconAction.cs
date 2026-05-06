@@ -8,8 +8,8 @@ namespace MMBGame
 
         public override bool Execute(ChessPiece target, PieceColor actorColor, PoliticalManager manager, int value)
         {
-            string lastAction = manager.GetLastOpponentAction(actorColor);
-            EventBus.Instance.PublishReconResult(lastAction ?? "없음");
+            string recentActions = manager.GetRecentOpponentActions(actorColor);
+            EventBus.Instance.PublishReconResult(recentActions ?? "없음");
             return true;
         }
     }

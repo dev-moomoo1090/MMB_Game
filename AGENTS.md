@@ -80,8 +80,17 @@
 | BoardMoveIndicators | BoardManager, BoardPieceVisual, BoardCoordinateMapper, Move, SpriteRenderer | 직접 읽기 / 생성 |
 | BoardPieceProfileDisplay | BoardManager, BoardPieceVisual, ChessPiece, SpriteRenderer, TextMesh | 직접 읽기 / 생성 |
 | BoardPieceVisual | BoardPieceVisuals, ChessPiece, SpriteRenderer, BoxCollider2D | 직접 호출 |
+| CommandBook | PageTurnAnimation, CommandActionButton, SpriteRenderer | 페이지 전환 / 입력 처리 |
+| CommandActionButton | PoliticsManager, MilitaryManager, PoliticalManager, TurnManager, BoardInteraction, ChessPiece, CommandActionTooltip | 직접 호출 / 버튼 입력 |
+| CommandActionButtonVisualFeedback | CommandActionButton, BoxCollider2D, Transform | 직접 호출 / 시각 피드백 |
+| CommandActionInputPrompt | CommandActionButton, TextMesh, SpriteRenderer, Keyboard | 정적 호출 / 입력값 처리 |
+| CommandActionInputRequirements | (없음) | 정적 데이터 |
+| CommandActionTooltip | CommandActionButton, CommandActionTooltipDescriptions, SpriteRenderer, TextMesh, BoxCollider2D | 정적 호출 / 호버 설명 표시 |
+| CommandActionTooltipDescriptions | (없음) | 정적 데이터 |
+| TurnStatusDisplay | TurnManager, EventBus, TextMesh, SpriteRenderer | 이벤트 구독 / 턴 표시 |
 | BoardCoordinateMapper | Transform, SpriteRenderer | 정적 호출 |
 | BuildChessBoard | BoardCoordinateMapper | 정적 호출 |
+| BoardState | Square, ChessPiece, Move, 도로 상태 | 직접 보관 |
 | PieceSetupDefaults | PieceSetupDefinition, MovePattern | 정적 호출 |
 | PieceSideResolver | PieceType | 정적 호출 |
 | ChessPiece | MovePattern, PieceSetupDefinition, PieceSideResolver | 직접 적용 |
@@ -102,9 +111,9 @@
 | PoliticsManager | PlayerState, FiscalAction 서브클래스, BoardManager, EventBus | 직접 호출 |
 | FiscalAction (서브클래스) | ChessPiece, PlayerState, PoliticsManager, BoardManager | 직접 변경 |
 | MilitaryManager | BoardManager, MilitaryAction 서브클래스, EventBus | 직접 호출 |
-| MilitaryAction (서브클래스) | ChessPiece, MilitaryManager, BoardState, CheckDetector | 직접 변경 |
+| MilitaryAction (서브클래스) | ChessPiece, MilitaryManager, BoardState, CheckDetector, MovePattern | 직접 변경 |
 | PoliticalManager | BoardManager, PoliticsManager, PoliticalAction 서브클래스, EventBus | 직접 호출 |
-| PoliticalAction (서브클래스) | ChessPiece, PoliticalManager, PlayerState, BoardState, EventBus | 직접 변경 |
+| PoliticalAction (서브클래스) | ChessPiece, PoliticalManager, PlayerState, BoardState, MoveGenerator, SpecialMoves, EventBus | 직접 변경 |
 | KingStateEvaluator | PlayerState, BoardState, ChessPiece | 정적 호출 |
 
 ---
@@ -200,3 +209,13 @@
 - **초기 배치 회전**: 백 본진은 a파일, 백 폰은 b파일, 흑 본진은 h파일, 흑 폰은 g파일에 배치하고 폰 전진/앙파상/프로모션/캐슬링 기준을 파일 방향으로 조정
 - **합법수 표시**: BoardMoveIndicators 추가, 기물 선택 시 이동 가능 칸은 반투명 흰색 원, 포획 가능 칸은 반투명 회색 원으로 타일 중앙 표시
 - **기물 프로필 표시**: BoardPieceProfileDisplay 추가, 선택 기물의 프로필 이미지/이름/턴당 세금/지지도/행마 정보를 Position 오브젝트에 표시
+
+### 정치행동 문서 사양 반영 (2026-05-06)
+- **재정 행동 수치 보정**: 특세/감면 지지도 변화, 지원/징발 입력값 대비 기본 세금 비례 효과 반영
+- **군사 행동 추가**: 도로계획 구현, 인접한 아군 후방 3열 타일 사이 도로를 BoardState에 저장하고 도로 이동 후 제거되도록 MoveGenerator/SpecialMoves 연동
+- **정치 행동 수치 보정**: 정찰 최근 3개 행동 공개, 선전/선동/대민지원/여론조작/제후국/매수의 문서 공식 반영
+- **배신 하위 행동 추가**: 배신 - 접촉/정보/실책/파벌/암살 구현 및 PoliticalManager 등록
+- **정치 버튼 연결 검증**: CommandActionButton이 현재 턴 색상/선택 기물/기본 입력값을 PoliticalManager로 전달하도록 보강하고 방문/배신 하위 행동 버튼 추가, 플레이 모드에서 정치행동 18개 버튼 실행 경로 확인
+- **커맨드 힌트 박스 추가**: 버튼 호버 시 큰 투명 회색 배경과 흰색 글씨로 조건/비용/기능 설명 표시, 박스 영역까지 호버 유지 및 긴 설명 휠 스크롤 지원, 호버 종료 또는 클릭 시 자동 숨김
+- **턴 상태 표시 추가**: 왼쪽 하단에 현재 색상/페이즈를 `백 정치 턴`, `백 체스 턴`, `흑 정치 턴` 형식으로 표시하고 TurnManager 이벤트에 따라 갱신
+- **실제 플레이 흐름 보강**: 정치 페이즈 보드 행마 차단, 행동 성공 후 선택 기물 프로필 갱신, 입력값 필요 행동은 우측 하단 입력창에서 값 입력 후 적용되도록 연결

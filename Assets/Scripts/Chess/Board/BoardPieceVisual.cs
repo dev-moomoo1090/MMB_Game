@@ -14,15 +14,18 @@ namespace MMBGame
         private GameObject selectedModel;
         private int file;
         private int rank;
+        private ChessPiece piece;
 
         public int File => file;
         public int Rank => rank;
+        public ChessPiece Piece => piece;
 
-        public void Initialize(BoardPieceVisuals newOwner, ChessPiece piece, Sprite newNormalSprite, Sprite newSelectedSprite)
+        public void Initialize(BoardPieceVisuals newOwner, ChessPiece newPiece, Sprite newNormalSprite, Sprite newSelectedSprite)
         {
             owner = newOwner;
-            file = piece.file;
-            rank = piece.rank;
+            piece = newPiece;
+            file = newPiece.file;
+            rank = newPiece.rank;
             normalSprite = newNormalSprite;
             selectedSprite = newSelectedSprite != null ? newSelectedSprite : newNormalSprite;
             spriteRenderer = GetComponent<SpriteRenderer>();
@@ -30,11 +33,12 @@ namespace MMBGame
             FitColliderToSprite();
         }
 
-        public void Initialize(BoardPieceVisuals newOwner, ChessPiece piece, GameObject newNormalModel, GameObject newSelectedModel)
+        public void Initialize(BoardPieceVisuals newOwner, ChessPiece newPiece, GameObject newNormalModel, GameObject newSelectedModel)
         {
             owner = newOwner;
-            file = piece.file;
-            rank = piece.rank;
+            piece = newPiece;
+            file = newPiece.file;
+            rank = newPiece.rank;
             normalModel = newNormalModel;
             selectedModel = newSelectedModel;
             SetSelected(false);
