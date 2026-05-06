@@ -48,7 +48,7 @@ namespace MMBGame
                     return true;
                 }
             }
-
+            // 테스트 커밋
             if (parts.Length == 3 && int.TryParse(parts[1], out int displayFile) && int.TryParse(parts[2], out int displayRank))
             {
                 Vector2Int logicalSquare = ToLogicalSquare(displayFile, displayRank);
