@@ -46,12 +46,12 @@ namespace MMBGame
         {
             if (CheckDetector.IsInCheck(state, king.color)) return false;
             PieceColor enemy = king.color == PieceColor.White ? PieceColor.Black : PieceColor.White;
-            int rank = king.rank;
+            int file = king.file;
             if (move.specialMove == SpecialMoveType.CastleKingside)
-                return !CheckDetector.IsSquareAttacked(state, 5, rank, enemy)
-                    && !CheckDetector.IsSquareAttacked(state, 6, rank, enemy);
-            return !CheckDetector.IsSquareAttacked(state, 3, rank, enemy)
-                && !CheckDetector.IsSquareAttacked(state, 2, rank, enemy);
+                return !CheckDetector.IsSquareAttacked(state, file, 5, enemy)
+                    && !CheckDetector.IsSquareAttacked(state, file, 6, enemy);
+            return !CheckDetector.IsSquareAttacked(state, file, 3, enemy)
+                && !CheckDetector.IsSquareAttacked(state, file, 2, enemy);
         }
     }
 }

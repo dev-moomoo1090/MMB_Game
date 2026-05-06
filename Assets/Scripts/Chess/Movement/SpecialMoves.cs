@@ -33,32 +33,32 @@ namespace MMBGame
         {
             PlacePiece(state, pawn, move.toFile, move.toRank);
             state.enPassantAvailable = true;
-            state.enPassantFile = move.toFile;
-            state.enPassantRank = (move.fromRank + move.toRank) / 2;
+            state.enPassantFile = (move.fromFile + move.toFile) / 2;
+            state.enPassantRank = move.toRank;
         }
 
         private static void ApplyEnPassant(BoardState state, ChessPiece pawn, Move move)
         {
-            state.squares[move.toFile, move.fromRank].piece = null;
+            state.squares[move.fromFile, move.toRank].piece = null;
             PlacePiece(state, pawn, move.toFile, move.toRank);
         }
 
         private static void ApplyCastleKingside(BoardState state, ChessPiece king)
         {
-            int rank = king.rank;
-            var rook = state.GetPiece(7, rank);
-            state.squares[7, rank].piece = null;
-            PlacePiece(state, king, 6, rank);
-            if (rook != null) { rook.hasMoved = true; PlacePiece(state, rook, 5, rank); }
+            int file = king.file;
+            var rook = state.GetPiece(file, 7);
+            state.squares[file, 7].piece = null;
+            PlacePiece(state, king, file, 6);
+            if (rook != null) { rook.hasMoved = true; PlacePiece(state, rook, file, 5); }
         }
 
         private static void ApplyCastleQueenside(BoardState state, ChessPiece king)
         {
-            int rank = king.rank;
-            var rook = state.GetPiece(0, rank);
-            state.squares[0, rank].piece = null;
-            PlacePiece(state, king, 2, rank);
-            if (rook != null) { rook.hasMoved = true; PlacePiece(state, rook, 3, rank); }
+            int file = king.file;
+            var rook = state.GetPiece(file, 0);
+            state.squares[file, 0].piece = null;
+            PlacePiece(state, king, file, 2);
+            if (rook != null) { rook.hasMoved = true; PlacePiece(state, rook, file, 3); }
         }
 
         private static void ApplyPromotion(BoardState state, ChessPiece pawn, Move move)
@@ -86,19 +86,19 @@ namespace MMBGame
             {
                 if (piece.color == PieceColor.White)
                 {
-                    if (piece.file == 7 && piece.rank == 0) state.whiteKingsideCastle = false;
+                    if (piece.file == 0 && piece.rank == 7) state.whiteKingsideCastle = false;
                     if (piece.file == 0 && piece.rank == 0) state.whiteQueensideCastle = false;
                 }
                 else
                 {
                     if (piece.file == 7 && piece.rank == 7) state.blackKingsideCastle = false;
-                    if (piece.file == 0 && piece.rank == 7) state.blackQueensideCastle = false;
+                    if (piece.file == 7 && piece.rank == 0) state.blackQueensideCastle = false;
                 }
             }
-            if (move.toFile == 7 && move.toRank == 0) state.whiteKingsideCastle = false;
             if (move.toFile == 0 && move.toRank == 0) state.whiteQueensideCastle = false;
+            if (move.toFile == 0 && move.toRank == 7) state.whiteKingsideCastle = false;
+            if (move.toFile == 7 && move.toRank == 0) state.blackQueensideCastle = false;
             if (move.toFile == 7 && move.toRank == 7) state.blackKingsideCastle = false;
-            if (move.toFile == 0 && move.toRank == 7) state.blackQueensideCastle = false;
         }
     }
 }

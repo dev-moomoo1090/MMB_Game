@@ -5,45 +5,45 @@ namespace MMBGame
 {
     public class BoardManager : MonoBehaviour
     {
-        [SerializeField] private BoardPieceVisuals pieceVisuals;
-        [SerializeField] private List<PieceSetupDefinition> pieceDefinitions = new List<PieceSetupDefinition>();
+        [SerializeField] private BoardPieceSetupManager pieceSetupManager;
 
         public BoardState BoardState { get; private set; }
 
         private void Awake()
         {
+            EnsurePieceSetupManager();
             BoardState = new BoardState();
             SetupInitialPosition();
             BoardState.RecordPosition();
-            SyncPieceVisuals();
+            RefreshPieceVisuals();
         }
 
         private void SetupInitialPosition()
         {
             Place(new Rook(PieceColor.White, 0, 0));
-            Place(new Knight(PieceColor.White, 1, 0));
-            Place(new Bishop(PieceColor.White, 2, 0));
-            Place(new Queen(PieceColor.White, 3, 0));
-            Place(new King(PieceColor.White, 4, 0));
-            Place(new Bishop(PieceColor.White, 5, 0));
-            Place(new Knight(PieceColor.White, 6, 0));
-            Place(new Rook(PieceColor.White, 7, 0));
-            for (int f = 0; f < 8; f++) Place(new Pawn(PieceColor.White, f, 1));
+            Place(new Knight(PieceColor.White, 0, 1));
+            Place(new Bishop(PieceColor.White, 0, 2));
+            Place(new Queen(PieceColor.White, 0, 3));
+            Place(new King(PieceColor.White, 0, 4));
+            Place(new Bishop(PieceColor.White, 0, 5));
+            Place(new Knight(PieceColor.White, 0, 6));
+            Place(new Rook(PieceColor.White, 0, 7));
+            for (int r = 0; r < 8; r++) Place(new Pawn(PieceColor.White, 1, r));
 
-            Place(new Rook(PieceColor.Black, 0, 7));
-            Place(new Knight(PieceColor.Black, 1, 7));
-            Place(new Bishop(PieceColor.Black, 2, 7));
-            Place(new Queen(PieceColor.Black, 3, 7));
-            Place(new King(PieceColor.Black, 4, 7));
-            Place(new Bishop(PieceColor.Black, 5, 7));
-            Place(new Knight(PieceColor.Black, 6, 7));
+            Place(new Rook(PieceColor.Black, 7, 0));
+            Place(new Knight(PieceColor.Black, 7, 1));
+            Place(new Bishop(PieceColor.Black, 7, 2));
+            Place(new Queen(PieceColor.Black, 7, 3));
+            Place(new King(PieceColor.Black, 7, 4));
+            Place(new Bishop(PieceColor.Black, 7, 5));
+            Place(new Knight(PieceColor.Black, 7, 6));
             Place(new Rook(PieceColor.Black, 7, 7));
-            for (int f = 0; f < 8; f++) Place(new Pawn(PieceColor.Black, f, 6));
+            for (int r = 0; r < 8; r++) Place(new Pawn(PieceColor.Black, 6, r));
         }
 
         private void Place(ChessPiece piece)
         {
-            piece.ApplySetup(GetPieceDefinition(piece.color, piece.side, piece.type));
+            pieceSetupManager.ApplySetup(piece);
             BoardState.squares[piece.file, piece.rank].piece = piece;
         }
 
@@ -74,10 +74,10 @@ namespace MMBGame
                 }
 
                 SpecialMoves.ApplyMove(BoardState, lm);
-                ApplySetupAfterMove(lm);
+                pieceSetupManager.ApplyPromotionSetup(BoardState, lm);
                 piece.ClearOneTimeMovePatterns();
                 BoardState.RecordPosition();
-                SyncPieceVisuals();
+                RefreshPieceVisuals();
                 return true;
             }
             return false;
@@ -92,10 +92,9 @@ namespace MMBGame
 
             obstacle.file = file;
             obstacle.rank = rank;
-            obstacle.side = PieceSideResolver.Resolve(obstacle.type, file);
-            obstacle.ApplySetup(GetPieceDefinition(obstacle.color, obstacle.side, obstacle.type));
+            pieceSetupManager.ApplySetup(obstacle);
             BoardState.squares[file, rank].piece = obstacle;
-            SyncPieceVisuals();
+            RefreshPieceVisuals();
             return true;
         }
 
@@ -119,7 +118,7 @@ namespace MMBGame
                 BoardState.offBoardPieces.Add(piece);
             }
 
-            SyncPieceVisuals();
+            RefreshPieceVisuals();
             return true;
         }
 
@@ -171,7 +170,7 @@ namespace MMBGame
             }
 
             BoardState.offBoardPieces.Remove(piece);
-            SyncPieceVisuals();
+            RefreshPieceVisuals();
             return true;
         }
 
@@ -201,72 +200,22 @@ namespace MMBGame
 
         public void RefreshPieceVisuals()
         {
-            SyncPieceVisuals();
+            EnsurePieceSetupManager();
+            pieceSetupManager.SyncVisuals(BoardState);
         }
 
-        private PieceSetupDefinition GetPieceDefinition(PieceColor color, PieceSide side, PieceType type)
+        private void EnsurePieceSetupManager()
         {
-            PieceSetupDefinition fallbackDefinition = null;
-            for (int i = 0; i < pieceDefinitions.Count; i++)
+            if (pieceSetupManager == null)
             {
-                PieceSetupDefinition definition = pieceDefinitions[i];
-                if (definition == null || definition.color != color || definition.type != type)
-                {
-                    continue;
-                }
-
-                if (definition.side == side)
-                {
-                    return definition;
-                }
-
-                if (definition.side == PieceSide.None)
-                {
-                    fallbackDefinition = definition;
-                }
+                pieceSetupManager = FindObjectOfType<BoardPieceSetupManager>();
             }
 
-            return fallbackDefinition;
-        }
-
-        private void ApplySetupAfterMove(Move move)
-        {
-            if (move.specialMove != SpecialMoveType.Promotion)
+            if (pieceSetupManager == null)
             {
-                return;
+                GameObject managerObject = new GameObject("PieceSetupManager");
+                pieceSetupManager = managerObject.AddComponent<BoardPieceSetupManager>();
             }
-
-            ChessPiece promotedPiece = BoardState.GetPiece(move.toFile, move.toRank);
-            if (promotedPiece != null)
-            {
-                promotedPiece.side = PieceSideResolver.Resolve(promotedPiece.type, move.toFile);
-                promotedPiece.ApplySetup(GetPieceDefinition(promotedPiece.color, promotedPiece.side, promotedPiece.type));
-                promotedPiece.hasMoved = true;
-            }
-        }
-
-        private void SyncPieceVisuals()
-        {
-            if (pieceVisuals == null)
-            {
-                pieceVisuals = FindObjectOfType<BoardPieceVisuals>();
-            }
-
-            if (pieceVisuals == null)
-            {
-                pieceVisuals = gameObject.AddComponent<BoardPieceVisuals>();
-            }
-
-            if (pieceVisuals != null)
-            {
-                pieceVisuals.Sync(BoardState, pieceDefinitions);
-            }
-        }
-
-        [ContextMenu("Fill Default Piece Definitions")]
-        private void FillDefaultPieceDefinitions()
-        {
-            PieceSetupDefaults.Fill(pieceDefinitions);
         }
     }
 }

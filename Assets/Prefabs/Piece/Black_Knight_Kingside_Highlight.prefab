@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &4098026832333284529
 GameObject:
@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3881898952683342808}
   - component: {fileID: 59801236457608047}
   m_Layer: 0
-  m_Name: Black_Knight_Kingnside_Highlight
+  m_Name: Black_Knight_Kingside_Highlight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -91,3 +91,4 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+

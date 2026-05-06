@@ -36,12 +36,14 @@ public class BuildChessBoard
             {
                 float x = (file - rank) * halfW;
                 float y = -(file + rank) * halfH;
+                int logicalFile = 7 - file;
+                int logicalRank = 7 - rank;
 
-                bool isWhite = (file + rank) % 2 == 0;
+                bool isWhite = (logicalFile + logicalRank) % 2 == 0;
                 GameObject prefab = isWhite ? whitePrefab : blackPrefab;
 
                 GameObject tile = (GameObject)PrefabUtility.InstantiatePrefab(prefab, boardRoot.transform);
-                tile.name = $"Tile_{file}_{rank}";
+                tile.name = MMBGame.BoardCoordinateMapper.GetTileName(logicalFile, logicalRank);
                 tile.transform.localPosition = new Vector3(x, y, 0f);
             }
         }

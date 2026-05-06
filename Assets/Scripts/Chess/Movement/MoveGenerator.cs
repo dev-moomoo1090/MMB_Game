@@ -125,34 +125,34 @@ namespace MMBGame
         private static void GeneratePawnMoves(BoardState state, ChessPiece pawn, List<Move> moves)
         {
             int dir = pawn.color == PieceColor.White ? 1 : -1;
-            int startRank = pawn.color == PieceColor.White ? 1 : 6;
-            int promoRank = pawn.color == PieceColor.White ? 7 : 0;
-            int fwd = pawn.rank + dir;
+            int startFile = pawn.color == PieceColor.White ? 1 : 6;
+            int promoFile = pawn.color == PieceColor.White ? 7 : 0;
+            int fwd = pawn.file + dir;
 
-            if (state.IsInBounds(pawn.file, fwd) && state.GetPiece(pawn.file, fwd) == null)
+            if (state.IsInBounds(fwd, pawn.rank) && state.GetPiece(fwd, pawn.rank) == null)
             {
-                if (fwd == promoRank)
-                    AddPromotionMoves(moves, pawn.file, pawn.rank, pawn.file, fwd);
+                if (fwd == promoFile)
+                    AddPromotionMoves(moves, pawn.file, pawn.rank, fwd, pawn.rank);
                 else
                 {
-                    moves.Add(new Move(pawn.file, pawn.rank, pawn.file, fwd));
-                    if (pawn.rank == startRank && state.GetPiece(pawn.file, pawn.rank + dir * 2) == null)
-                        moves.Add(new Move(pawn.file, pawn.rank, pawn.file, pawn.rank + dir * 2, SpecialMoveType.PawnDoubleAdvance));
+                    moves.Add(new Move(pawn.file, pawn.rank, fwd, pawn.rank));
+                    if (pawn.file == startFile && state.GetPiece(pawn.file + dir * 2, pawn.rank) == null)
+                        moves.Add(new Move(pawn.file, pawn.rank, pawn.file + dir * 2, pawn.rank, SpecialMoveType.PawnDoubleAdvance));
                 }
             }
 
-            foreach (int df in new[] { -1, 1 })
+            foreach (int dr in new[] { -1, 1 })
             {
-                int cf = pawn.file + df;
-                if (!state.IsInBounds(cf, fwd)) continue;
-                ChessPiece target = state.GetPiece(cf, fwd);
+                int cr = pawn.rank + dr;
+                if (!state.IsInBounds(fwd, cr)) continue;
+                ChessPiece target = state.GetPiece(fwd, cr);
                 if (target != null && !IsObstacle(target) && target.color != pawn.color)
                 {
-                    if (fwd == promoRank) AddPromotionMoves(moves, pawn.file, pawn.rank, cf, fwd);
-                    else moves.Add(new Move(pawn.file, pawn.rank, cf, fwd));
+                    if (fwd == promoFile) AddPromotionMoves(moves, pawn.file, pawn.rank, fwd, cr);
+                    else moves.Add(new Move(pawn.file, pawn.rank, fwd, cr));
                 }
-                if (state.enPassantAvailable && cf == state.enPassantFile && fwd == state.enPassantRank)
-                    moves.Add(new Move(pawn.file, pawn.rank, cf, fwd, SpecialMoveType.EnPassant));
+                if (state.enPassantAvailable && fwd == state.enPassantFile && cr == state.enPassantRank)
+                    moves.Add(new Move(pawn.file, pawn.rank, fwd, cr, SpecialMoveType.EnPassant));
             }
         }
 
@@ -168,20 +168,20 @@ namespace MMBGame
         {
             GeneratePatternMoves(state, king, moves);
             if (king.hasMoved) return;
-            int rank = king.rank;
+            int file = king.file;
             bool ksRight = king.color == PieceColor.White ? state.whiteKingsideCastle : state.blackKingsideCastle;
             bool qsRight = king.color == PieceColor.White ? state.whiteQueensideCastle : state.blackQueensideCastle;
-            if (ksRight && state.GetPiece(5, rank) == null && state.GetPiece(6, rank) == null)
+            if (ksRight && state.GetPiece(file, 5) == null && state.GetPiece(file, 6) == null)
             {
-                var rook = state.GetPiece(7, rank);
+                var rook = state.GetPiece(file, 7);
                 if (rook != null && rook.type == PieceType.Rook && !rook.hasMoved)
-                    moves.Add(new Move(king.file, rank, 6, rank, SpecialMoveType.CastleKingside));
+                    moves.Add(new Move(file, king.rank, file, 6, SpecialMoveType.CastleKingside));
             }
-            if (qsRight && state.GetPiece(3, rank) == null && state.GetPiece(2, rank) == null && state.GetPiece(1, rank) == null)
+            if (qsRight && state.GetPiece(file, 3) == null && state.GetPiece(file, 2) == null && state.GetPiece(file, 1) == null)
             {
-                var rook = state.GetPiece(0, rank);
+                var rook = state.GetPiece(file, 0);
                 if (rook != null && rook.type == PieceType.Rook && !rook.hasMoved)
-                    moves.Add(new Move(king.file, rank, 2, rank, SpecialMoveType.CastleQueenside));
+                    moves.Add(new Move(file, king.rank, file, 2, SpecialMoveType.CastleQueenside));
             }
         }
     }

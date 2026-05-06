@@ -73,9 +73,15 @@
 
 | 클래스 | 참조하는 클래스 | 방식 |
 |--------|----------------|------|
-| BoardManager | BoardState, MoveValidator, CheckDetector, SpecialMoves, DrawDetector, ObedienceSystem, EventBus, BoardPieceVisuals, PieceSetupDefinition, PieceSideResolver | 직접 호출 / SerializeField |
-| BoardPieceVisuals | BoardState, PieceSetupDefinition, ChessPiece, BoardPieceVisual, SpriteRenderer | 직접 읽기 / 생성 |
+| BoardManager | BoardState, MoveValidator, CheckDetector, SpecialMoves, DrawDetector, ObedienceSystem, EventBus, BoardPieceSetupManager | 직접 호출 / SerializeField |
+| BoardPieceSetupManager | BoardPieceVisuals, PieceSetupDefinition, PieceSideResolver, ChessPiece, BoardState | 직접 호출 / SerializeField |
+| BoardPieceVisuals | BoardState, PieceSetupDefinition, ChessPiece, BoardPieceVisual, BoardInteraction, BoardCoordinateMapper, SpriteRenderer | 직접 읽기 / 생성 |
+| BoardInteraction | BoardManager, BoardPieceVisuals, BoardPieceVisual, BoardMoveIndicators, BoardPieceProfileDisplay | 직접 호출 / 입력 처리 |
+| BoardMoveIndicators | BoardManager, BoardPieceVisual, BoardCoordinateMapper, Move, SpriteRenderer | 직접 읽기 / 생성 |
+| BoardPieceProfileDisplay | BoardManager, BoardPieceVisual, ChessPiece, SpriteRenderer, TextMesh | 직접 읽기 / 생성 |
 | BoardPieceVisual | BoardPieceVisuals, ChessPiece, SpriteRenderer, BoxCollider2D | 직접 호출 |
+| BoardCoordinateMapper | Transform, SpriteRenderer | 정적 호출 |
+| BuildChessBoard | BoardCoordinateMapper | 정적 호출 |
 | PieceSetupDefaults | PieceSetupDefinition, MovePattern | 정적 호출 |
 | PieceSideResolver | PieceType | 정적 호출 |
 | ChessPiece | MovePattern, PieceSetupDefinition, PieceSideResolver | 직접 적용 |
@@ -183,8 +189,14 @@
 
 ### 보드 기물 비주얼/설정 보강 (2026-05-06)
 - **기물 설정**: PieceSetupDefinition 추가, 인스펙터에서 색상/종류별 기본/선택 프리팹 또는 스프라이트, 초기 세금, 초기 지지도, 기본 행마법 설정 지원
-- **기본값 생성**: PieceSetupDefaults 추가, BoardManager 컨텍스트 메뉴에서 표준 12기물 정의 자동 생성 지원
+- **기본값 생성**: PieceSetupDefaults 추가, BoardPieceSetupManager 컨텍스트 메뉴에서 표준 12기물 정의 자동 생성 지원
 - **비주얼 생성**: BoardPieceVisuals 추가, 보드 타일 위치에 맞춰 SpriteRenderer 기물 자동 생성 및 보드 상태 변경 시 동기화
 - **기물 선택 비주얼**: BoardPieceVisual 추가, 기물 클릭 시 선택 프리팹/스프라이트로 전환하고 이전 선택 기물은 기본 비주얼로 복귀
 - **복제 보강**: ChessPiece Clone 시 커스텀 행마법/상태가 시뮬레이션에 유지되도록 CopyStateTo 추가
 - **사이드 구분**: PieceSide와 PieceSideResolver 추가, 킹/퀸은 None, 폰/룩/나이트/비숍은 퀸사이드/킹사이드 정의로 분리
+- **프리팹/위치/크기 보정**: 누락된 색상별 기물 프리팹은 같은 색 폰 프리팹으로 대체하고, 런타임 기물 비주얼 기본 스케일을 0.55로 조정, 기물 하단 중심을 타일 중심에 정렬
+- **보드 클릭 이동**: BoardInteraction 추가, 기물 선택 후 기물/빈 타일 클릭으로 BoardManager.TryMove 실행 지원
+- **좌표 체계 정리**: BoardCoordinateMapper 추가, 요청 기준에 따라 기존 h1/h8 위치를 새 a1/a8로, 기존 a1/a8 위치를 새 h1/h8로 두고 타일 이름을 Tile_a1~Tile_h8 형식으로 사용하도록 조정
+- **초기 배치 회전**: 백 본진은 a파일, 백 폰은 b파일, 흑 본진은 h파일, 흑 폰은 g파일에 배치하고 폰 전진/앙파상/프로모션/캐슬링 기준을 파일 방향으로 조정
+- **합법수 표시**: BoardMoveIndicators 추가, 기물 선택 시 이동 가능 칸은 반투명 흰색 원, 포획 가능 칸은 반투명 회색 원으로 타일 중앙 표시
+- **기물 프로필 표시**: BoardPieceProfileDisplay 추가, 선택 기물의 프로필 이미지/이름/턴당 세금/지지도/행마 정보를 Position 오브젝트에 표시
