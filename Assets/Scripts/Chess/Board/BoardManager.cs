@@ -9,6 +9,8 @@ namespace MMBGame
 
         public BoardState BoardState { get; private set; }
 
+        private TurnManager turnManager;
+
         private void Awake()
         {
             EnsurePieceSetupManager();
@@ -54,6 +56,11 @@ namespace MMBGame
 
         public bool TryMove(int fromFile, int fromRank, int toFile, int toRank, PieceType promotionPiece = PieceType.Queen)
         {
+            if (!IsChessPhase())
+            {
+                return false;
+            }
+
             ChessPiece piece = BoardState.GetPiece(fromFile, fromRank);
             if (piece == null || piece.color != BoardState.currentTurn) return false;
             if (ObedienceSystem.IsRefused(piece))
@@ -216,6 +223,16 @@ namespace MMBGame
                 GameObject managerObject = new GameObject("PieceSetupManager");
                 pieceSetupManager = managerObject.AddComponent<BoardPieceSetupManager>();
             }
+        }
+
+        private bool IsChessPhase()
+        {
+            if (turnManager == null)
+            {
+                turnManager = FindFirstObjectByType<TurnManager>();
+            }
+
+            return turnManager == null || turnManager.CurrentPhase == GamePhase.ChessPhase;
         }
     }
 }
