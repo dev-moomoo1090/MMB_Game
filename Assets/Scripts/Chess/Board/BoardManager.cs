@@ -62,8 +62,8 @@ namespace MMBGame
             }
 
             ChessPiece piece = BoardState.GetPiece(fromFile, fromRank);
-            if (piece == null || piece.color != BoardState.currentTurn) return false;
-            if (ObedienceSystem.IsRefused(piece))
+            if (piece == null || piece.GetMovementControllerColor() != BoardState.currentTurn) return false;
+            if (ObedienceSystem.IsRefused(piece, BoardState))
             {
                 if (HonorPiecePassiveSystem.Instance == null || !HonorPiecePassiveSystem.Instance.TryRerollMovementRefusal(piece))
                 {

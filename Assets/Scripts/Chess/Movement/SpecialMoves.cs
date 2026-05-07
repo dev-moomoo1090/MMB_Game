@@ -83,6 +83,7 @@ namespace MMBGame
                 default:               promoted = new Queen(pawn.color, move.toFile, move.toRank); break;
             }
             promoted.hasMoved = true;
+            promoted.movementControllerColor = pawn.GetMovementControllerColor();
             state.squares[move.toFile, move.toRank].piece = promoted;
         }
 

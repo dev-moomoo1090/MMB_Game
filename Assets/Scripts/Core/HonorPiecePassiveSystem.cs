@@ -12,7 +12,9 @@ namespace MMBGame
         private readonly Dictionary<PieceColor, Dictionary<ChessPiece, int>> pawnSupplyCounts = new Dictionary<PieceColor, Dictionary<ChessPiece, int>>();
         private readonly Dictionary<PieceColor, HashSet<string>> freeMilitaryActions = new Dictionary<PieceColor, HashSet<string>>();
         private readonly Dictionary<PieceColor, float> taxIncomeMultipliers = new Dictionary<PieceColor, float>();
+        private readonly Dictionary<PieceColor, int> supportLossByColor = new Dictionary<PieceColor, int>();
         private readonly HashSet<PieceColor> tradeAcceptedColors = new HashSet<PieceColor>();
+        private bool suppressDishonorTracking;
 
         private BoardManager boardManager;
         private PoliticsManager politicsManager;
@@ -31,11 +33,17 @@ namespace MMBGame
 
             EventBus.Instance.OnPhaseChanged -= HandlePhaseChanged;
             EventBus.Instance.OnPhaseChanged += HandlePhaseChanged;
+            EventBus.Instance.OnSupportChanged -= HandleSupportChanged;
+            EventBus.Instance.OnSupportChanged += HandleSupportChanged;
+            EventBus.Instance.OnPieceCapturePending -= HandlePieceCapturePending;
+            EventBus.Instance.OnPieceCapturePending += HandlePieceCapturePending;
         }
 
         private void OnDestroy()
         {
             EventBus.Instance.OnPhaseChanged -= HandlePhaseChanged;
+            EventBus.Instance.OnSupportChanged -= HandleSupportChanged;
+            EventBus.Instance.OnPieceCapturePending -= HandlePieceCapturePending;
             if (Instance == this)
             {
                 Instance = null;
@@ -51,6 +59,7 @@ namespace MMBGame
             PlayerState player = GetPlayer(color);
             if (!IsHonorActive(player))
             {
+                TryApplyDishonorSupportLoss(color, player);
                 return;
             }
 
@@ -59,6 +68,7 @@ namespace MMBGame
             TryBishopKingsideLedgerManipulation(color);
             TryRookQueensideTradeOffer(color, player);
             TryRookQueensideFundingRequest(color, player);
+            TryApplyDishonorSupportLoss(color, player);
         }
 
         public float ConsumeTaxIncomeMultiplier(PieceColor color)
@@ -101,7 +111,7 @@ namespace MMBGame
                 return false;
             }
 
-            return !ObedienceSystem.RollRefusal(refusedPiece);
+            return !ObedienceSystem.RollRefusal(refusedPiece, boardManager != null ? boardManager.BoardState : null);
         }
 
         public void HandlePieceMoved(ChessPiece piece, BoardState state)
@@ -154,6 +164,63 @@ namespace MMBGame
             TryBishopKingsideStrategy(color, player);
         }
 
+        private void HandleSupportChanged(ChessPiece piece, int delta, string reason)
+        {
+            if (suppressDishonorTracking || piece == null || delta >= 0)
+            {
+                return;
+            }
+
+            EnsureColor(piece.color);
+            supportLossByColor[piece.color] += -delta;
+        }
+
+        private void HandlePieceCapturePending(ChessPiece piece)
+        {
+            EnsureReferences();
+            if (piece == null)
+            {
+                return;
+            }
+
+            PlayerState player = GetPlayer(piece.color);
+            if (!IsDishonorActive(player))
+            {
+                return;
+            }
+
+            int value = BoardEvaluator.GetPieceValue(piece.type);
+            if (value <= 0)
+            {
+                return;
+            }
+
+            suppressDishonorTracking = true;
+            ApplyToAllPieces(piece.color, targetPiece => PoliticalStatService.ChangeSupport(targetPiece, -value, "DishonorCapturePenalty"));
+            suppressDishonorTracking = false;
+            player.AddHonor(-value);
+        }
+
+        private void TryApplyDishonorSupportLoss(PieceColor color, PlayerState player)
+        {
+            if (!IsDishonorActive(player))
+            {
+                supportLossByColor[color] = 0;
+                return;
+            }
+
+            int penalty = supportLossByColor[color] / 10;
+            supportLossByColor[color] = 0;
+            if (penalty <= 0)
+            {
+                return;
+            }
+
+            suppressDishonorTracking = true;
+            ApplyToAllPieces(color, piece => PoliticalStatService.ChangeSupport(piece, -penalty, "DishonorSupportLossPenalty"));
+            suppressDishonorTracking = false;
+        }
+
         private void TryPawnSupplySupport(PieceColor color, PlayerState player)
         {
             List<ChessPiece> pawns = GetPieces(color, PieceType.Pawn, PieceSide.None, true);
@@ -204,7 +271,7 @@ namespace MMBGame
                 return;
             }
 
-            ApplyToAllPieces(color, piece => piece.support += 5);
+            ApplyToAllPieces(color, piece => PoliticalStatService.ChangeSupport(piece, 5, "KnightPraise"));
             player.AddHonor(5);
         }
 
@@ -266,11 +333,11 @@ namespace MMBGame
 
             if (player.SpendGold(30))
             {
-                rook.support += 5;
+                PoliticalStatService.ChangeSupport(rook, 5, "RookFundingRequest");
             }
             else
             {
-                rook.support -= 10;
+                PoliticalStatService.ChangeSupport(rook, -10, "RookFundingRequest");
             }
         }
 
@@ -401,7 +468,48 @@ namespace MMBGame
                 result.Add(piece);
             }
 
+            result.Sort(ComparePassivePriority);
             return result;
+        }
+
+        private int ComparePassivePriority(ChessPiece first, ChessPiece second)
+        {
+            int typeCompare = GetPassiveTypeOrder(first.type).CompareTo(GetPassiveTypeOrder(second.type));
+            if (typeCompare != 0)
+            {
+                return typeCompare;
+            }
+
+            int sideCompare = GetPassiveSideOrder(first.side).CompareTo(GetPassiveSideOrder(second.side));
+            if (sideCompare != 0)
+            {
+                return sideCompare;
+            }
+
+            return first.lane.CompareTo(second.lane);
+        }
+
+        private int GetPassiveTypeOrder(PieceType type)
+        {
+            switch (type)
+            {
+                case PieceType.Pawn: return 0;
+                case PieceType.Knight: return 1;
+                case PieceType.Bishop: return 2;
+                case PieceType.Rook: return 3;
+                case PieceType.Queen: return 4;
+                default: return 5;
+            }
+        }
+
+        private int GetPassiveSideOrder(PieceSide side)
+        {
+            switch (side)
+            {
+                case PieceSide.Queenside: return 0;
+                case PieceSide.Kingside: return 1;
+                default: return 2;
+            }
         }
 
         private PlayerState GetPlayer(PieceColor color)
@@ -430,6 +538,11 @@ namespace MMBGame
             if (!taxIncomeMultipliers.ContainsKey(color))
             {
                 taxIncomeMultipliers[color] = 1f;
+            }
+
+            if (!supportLossByColor.ContainsKey(color))
+            {
+                supportLossByColor[color] = 0;
             }
         }
 

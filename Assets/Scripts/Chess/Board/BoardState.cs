@@ -23,6 +23,9 @@ namespace MMBGame
         public int roadARank;
         public int roadBFile;
         public int roadBRank;
+        public int globalAcceptanceWeight;
+        public int globalDefectionWeight;
+        public int globalRebellionWeight;
 
         public BoardState()
         {
@@ -40,6 +43,9 @@ namespace MMBGame
             positionHistory = new Dictionary<string, int>();
             offBoardPieces = new List<ChessPiece>();
             capturedThisTurn = new List<ChessPiece>();
+            globalAcceptanceWeight = 0;
+            globalDefectionWeight = 0;
+            globalRebellionWeight = 0;
             ClearRoad();
         }
 
@@ -187,6 +193,9 @@ namespace MMBGame
             clone.moveHistory = new List<Move>(moveHistory);
             clone.positionHistory = new Dictionary<string, int>(positionHistory);
             clone.offBoardPieces = new List<ChessPiece>();
+            clone.globalAcceptanceWeight = globalAcceptanceWeight;
+            clone.globalDefectionWeight = globalDefectionWeight;
+            clone.globalRebellionWeight = globalRebellionWeight;
             if (roadActive)
             {
                 clone.SetRoad(roadAFile, roadARank, roadBFile, roadBRank);

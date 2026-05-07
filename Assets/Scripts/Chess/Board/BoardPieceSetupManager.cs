@@ -50,7 +50,8 @@ namespace MMBGame
             }
 
             piece.side = PieceSideResolver.Resolve(piece.type, piece.rank);
-            piece.ApplySetup(GetPieceDefinition(piece.color, piece.side, piece.type));
+            piece.lane = PieceSideResolver.ResolveLane(piece.type, piece.rank);
+            piece.ApplySetup(GetPieceDefinition(piece.color, piece.side, piece.type, piece.lane));
         }
 
         public void ApplyPromotionSetup(BoardState boardState, Move move)
@@ -67,7 +68,8 @@ namespace MMBGame
             }
 
             promotedPiece.side = PieceSideResolver.Resolve(promotedPiece.type, move.toRank);
-            promotedPiece.ApplySetup(GetPieceDefinition(promotedPiece.color, promotedPiece.side, promotedPiece.type));
+            promotedPiece.lane = PieceSideResolver.ResolveLane(promotedPiece.type, move.toRank);
+            promotedPiece.ApplySetup(GetPieceDefinition(promotedPiece.color, promotedPiece.side, promotedPiece.type, promotedPiece.lane));
             promotedPiece.hasMoved = true;
         }
 
@@ -80,8 +82,9 @@ namespace MMBGame
             }
         }
 
-        public PieceSetupDefinition GetPieceDefinition(PieceColor color, PieceSide side, PieceType type)
+        public PieceSetupDefinition GetPieceDefinition(PieceColor color, PieceSide side, PieceType type, PieceLane lane = PieceLane.None)
         {
+            PieceSetupDefinition sideDefinition = null;
             PieceSetupDefinition fallbackDefinition = null;
             for (int i = 0; i < pieceDefinitions.Count; i++)
             {
@@ -91,18 +94,23 @@ namespace MMBGame
                     continue;
                 }
 
-                if (definition.side == side)
+                if (lane != PieceLane.None && definition.lane == lane)
                 {
                     return definition;
                 }
 
-                if (definition.side == PieceSide.None)
+                if (definition.side == side && definition.lane == PieceLane.None)
+                {
+                    sideDefinition = definition;
+                }
+
+                if (definition.side == PieceSide.None && definition.lane == PieceLane.None)
                 {
                     fallbackDefinition = definition;
                 }
             }
 
-            return fallbackDefinition;
+            return sideDefinition ?? fallbackDefinition;
         }
 
         private void EnsureVisuals()
@@ -129,6 +137,14 @@ namespace MMBGame
             if (pieceDefinitions.Count == 0)
             {
                 FillDefaultPieceDefinitions();
+                return;
+            }
+
+            if (PieceSetupDefaults.UpgradeIfNeeded(pieceDefinitions))
+            {
+#if UNITY_EDITOR
+                SchedulePrefabAssignment();
+#endif
             }
         }
 
@@ -203,18 +219,38 @@ namespace MMBGame
                 return prefab;
             }
 
-            return AssetDatabase.LoadAssetAtPath<GameObject>(GetPawnFallbackPath(definition.color, suffix));
+            prefab = AssetDatabase.LoadAssetAtPath<GameObject>(GetSidePrefabPath(definition, suffix));
+            if (prefab != null)
+            {
+                return prefab;
+            }
+
+            return AssetDatabase.LoadAssetAtPath<GameObject>(GetPawnFallbackPath(definition.color, definition.side, suffix));
         }
 
         private string GetPrefabPath(PieceSetupDefinition definition, string suffix)
+        {
+            string laneName = definition.lane == PieceLane.None ? string.Empty : "_" + definition.lane;
+            string path = "Assets/Prefabs/Piece/" + definition.color + "_" + definition.type + laneName + suffix + ".prefab";
+            if (definition.lane == PieceLane.None)
+            {
+                string sideName = definition.side == PieceSide.None ? string.Empty : "_" + definition.side;
+                path = "Assets/Prefabs/Piece/" + definition.color + "_" + definition.type + sideName + suffix + ".prefab";
+            }
+
+            return path;
+        }
+
+        private string GetSidePrefabPath(PieceSetupDefinition definition, string suffix)
         {
             string sideName = definition.side == PieceSide.None ? string.Empty : "_" + definition.side;
             return "Assets/Prefabs/Piece/" + definition.color + "_" + definition.type + sideName + suffix + ".prefab";
         }
 
-        private string GetPawnFallbackPath(PieceColor color, string suffix)
+        private string GetPawnFallbackPath(PieceColor color, PieceSide side, string suffix)
         {
-            return "Assets/Prefabs/Piece/" + color + "_Pawn_Queenside" + suffix + ".prefab";
+            string sideName = side == PieceSide.Kingside ? "_Kingside" : "_Queenside";
+            return "Assets/Prefabs/Piece/" + color + "_Pawn" + sideName + suffix + ".prefab";
         }
 #endif
     }

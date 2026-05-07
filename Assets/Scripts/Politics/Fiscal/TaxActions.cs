@@ -14,7 +14,7 @@ namespace MMBGame
             }
 
             targetPiece.taxModifier = 2;
-            targetPiece.support -= 5;
+            PoliticalStatService.ChangeSupport(targetPiece, -5, ActionName);
             return true;
         }
     }
@@ -33,7 +33,7 @@ namespace MMBGame
             }
 
             targetPiece.taxModifier = 0;
-            targetPiece.support += 5;
+            PoliticalStatService.ChangeSupport(targetPiece, 5, ActionName);
             return true;
         }
     }

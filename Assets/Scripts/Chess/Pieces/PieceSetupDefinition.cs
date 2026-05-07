@@ -8,6 +8,7 @@ namespace MMBGame
     {
         public PieceColor color = PieceColor.White;
         public PieceSide side = PieceSide.None;
+        public PieceLane lane = PieceLane.None;
         public PieceType type = PieceType.Pawn;
         public GameObject prefab;
         public GameObject selectedPrefab;

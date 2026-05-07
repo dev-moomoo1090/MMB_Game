@@ -166,7 +166,9 @@ namespace MMBGame
             float buttonY = center.y - 1.2f;
             float[] xOffsets = { -2.6f, 0f, 2.6f };
             string[] labels = { "석방", "처형", "몸값" };
-            string[] subLabels = { "+20 명예", "-20 명예", "+200 금화" };
+            int honorValue = BoardEvaluator.GetPieceValue(piece.type) * 5;
+            int ransomValue = BoardEvaluator.GetPieceValue(piece.type) * 100;
+            string[] subLabels = { "+" + honorValue + " 명예", "-" + honorValue + " 명예", "+" + ransomValue + " 금화" };
             Color[] colors =
             {
                 new Color(0.20f, 0.48f, 0.25f, 1f),
@@ -176,9 +178,9 @@ namespace MMBGame
 
             Action[] actions =
             {
-                () => ApplyChoice(attackerColor, 0),
+                () => ApplyChoice(attackerColor, 0, piece),
                 () => ApplyChoice(attackerColor, 1, piece),
-                () => ApplyChoice(attackerColor, 2),
+                () => ApplyChoice(attackerColor, 2, piece),
             };
 
             for (int i = 0; i < 3; i++)
@@ -221,15 +223,16 @@ namespace MMBGame
                 PlayerState player = pm.GetCurrentPlayer(attackerColor);
                 if (player != null)
                 {
+                    int pieceValue = capturedPiece != null ? BoardEvaluator.GetPieceValue(capturedPiece.type) : 0;
                     switch (choice)
                     {
-                        case 0: player.AddHonor(20); break;
+                        case 0: player.AddHonor(pieceValue * 5); break;
                         case 1:
                             KingStateEffectApplier.Instance?.SuppressNextHonorDecreasePenalty(attackerColor);
-                            player.AddHonor(-20);
+                            player.AddHonor(-pieceValue * 5);
                             ApplyDictatorshipPrisonerExecutionBonus(attackerColor, capturedPiece);
                             break;
-                        case 2: player.AddGold(200); break;
+                        case 2: player.AddGold(pieceValue * 100); break;
                     }
                 }
             }
@@ -262,7 +265,7 @@ namespace MMBGame
                 ChessPiece piece = pieces[i];
                 if (piece != null && piece.color == attackerColor)
                 {
-                    piece.support += bonus;
+                    PoliticalStatService.ChangeSupport(piece, bonus, "PrisonerExecutionBonus");
                 }
             }
         }
@@ -292,7 +295,7 @@ namespace MMBGame
                 return null;
             }
 
-            PieceSetupDefinition def = setupManager.GetPieceDefinition(piece.color, piece.side, piece.type);
+            PieceSetupDefinition def = setupManager.GetPieceDefinition(piece.color, piece.side, piece.type, piece.lane);
             return def?.sprite;
         }
 

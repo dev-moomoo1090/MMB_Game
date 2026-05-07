@@ -190,6 +190,11 @@ namespace MMBGame
             Sprite sprite = LoadProfileSprite(GetProfileAssetPath(piece));
             if (sprite == null)
             {
+                sprite = LoadProfileSprite(GetSideProfileAssetPath(piece));
+            }
+
+            if (sprite == null)
+            {
                 sprite = LoadProfileSprite(GetFallbackProfileAssetPath(piece.side));
             }
 
@@ -228,6 +233,12 @@ namespace MMBGame
 
         private string GetProfileAssetPath(ChessPiece piece)
         {
+            string laneName = piece.lane == PieceLane.None ? string.Empty : "_" + piece.lane;
+            return PROFILE_PATH + piece.color + "_" + piece.type + laneName + "_Profile.png";
+        }
+
+        private string GetSideProfileAssetPath(ChessPiece piece)
+        {
             string sideName = piece.side == PieceSide.None ? string.Empty : "_" + piece.side;
             return PROFILE_PATH + piece.color + "_" + piece.type + sideName + "_Profile.png";
         }
@@ -244,6 +255,12 @@ namespace MMBGame
 
         private string GetDisplayName(ChessPiece piece)
         {
+            string laneName = GetLaneName(piece.lane);
+            if (!string.IsNullOrEmpty(laneName))
+            {
+                return GetColorName(piece.color) + " " + laneName + " " + GetTypeName(piece.type);
+            }
+
             return GetColorName(piece.color) + " " + GetSideName(piece.side) + " " + GetTypeName(piece.type);
         }
 
@@ -265,6 +282,11 @@ namespace MMBGame
             }
 
             return side == PieceSide.Queenside ? "퀸사이드" : string.Empty;
+        }
+
+        private string GetLaneName(PieceLane lane)
+        {
+            return lane == PieceLane.None ? string.Empty : lane.ToString() + "열";
         }
 
         private string GetTypeName(PieceType type)

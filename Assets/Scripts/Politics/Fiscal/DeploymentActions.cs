@@ -18,7 +18,7 @@ namespace MMBGame
                 return false;
             }
 
-            targetPiece.support += 30;
+            PoliticalStatService.ChangeSupport(targetPiece, 30, ActionName);
             actor.goldPerTurn += targetPiece.taxPerTurn * 2;
             return true;
         }
@@ -42,7 +42,7 @@ namespace MMBGame
                 return false;
             }
 
-            targetPiece.support -= 50;
+            PoliticalStatService.ChangeSupport(targetPiece, -50, ActionName);
             actor.goldPerTurn -= targetPiece.taxPerTurn * 2;
             return true;
         }

@@ -13,7 +13,7 @@ namespace MMBGame
                 return false;
             }
 
-            target.support += 3;
+            PoliticalStatService.ChangeSupport(target, 3, ActionName);
             return true;
         }
     }

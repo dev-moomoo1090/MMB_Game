@@ -87,3 +87,7 @@ TODO.md
 
 # Visual Studio / temp
 *.slnx
+
+.cursor/
+.claude/
+.codex/

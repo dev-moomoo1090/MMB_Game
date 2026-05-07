@@ -3346,14 +3346,69 @@ MonoBehaviour:
   pieceDefinitions:
   - color: 1
     side: 1
-    lane: 1
+    type: 0
+    prefab: {fileID: 9150426614146808160, guid: defaeca92e62529438625fc6fcf3eb5c, type: 3}
+    selectedPrefab: {fileID: 2196997112271459474, guid: 615a4d2fbd95dc3409a1ce0c4c49b6bf, type: 3}
+    sprite: {fileID: 0}
+    selectedSprite: {fileID: 0}
+    initialTaxPerTurn: 1
+    initialSupport: 50
+    baseMovePatterns:
+    - deltaFile: 0
+      deltaRank: 1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 1
+      isCannon: 0
+    - deltaFile: 1
+      deltaRank: 1
+      isSliding: 0
+      captureOnly: 1
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 1
+      isSliding: 0
+      captureOnly: 1
+      moveOnly: 0
+      isCannon: 0
+  - color: 1
+    side: 2
+    type: 0
+    prefab: {fileID: 4149312537914271413, guid: 4370ffe93d8167b45abd773fddadd1f3, type: 3}
+    selectedPrefab: {fileID: 5767648109272453294, guid: 84a961da7e73c964db96058c9136b74e, type: 3}
+    sprite: {fileID: 0}
+    selectedSprite: {fileID: 0}
+    initialTaxPerTurn: 1
+    initialSupport: 50
+    baseMovePatterns:
+    - deltaFile: 0
+      deltaRank: 1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 1
+      isCannon: 0
+    - deltaFile: 1
+      deltaRank: 1
+      isSliding: 0
+      captureOnly: 1
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 1
+      isSliding: 0
+      captureOnly: 1
+      moveOnly: 0
+      isCannon: 0
+  - color: 1
+    side: 1
     type: 1
     prefab: {fileID: 5530773394380110359, guid: b33a27c7a63283844853a625e9f6a966, type: 3}
     selectedPrefab: {fileID: 1640346476643329204, guid: 3a9cbb684b72d684bbf5bb619ecff68d, type: 3}
     sprite: {fileID: 0}
     selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 50
-    initialSupport: 30
+    initialTaxPerTurn: 1
+    initialSupport: 50
     baseMovePatterns:
     - deltaFile: 1
       deltaRank: 0
@@ -3374,253 +3429,6 @@ MonoBehaviour:
       moveOnly: 0
       isCannon: 0
     - deltaFile: 0
-      deltaRank: -1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-  - color: 1
-    side: 1
-    lane: 2
-    type: 2
-    prefab: {fileID: 8535709498503595591, guid: 5d7faccc648a4094ca2f11dacd6543f9, type: 3}
-    selectedPrefab: {fileID: 3676321374891321833, guid: 4b634d04d2d13bf4d81b06598eb01aef, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 30
-    initialSupport: 15
-    baseMovePatterns:
-    - deltaFile: 1
-      deltaRank: 2
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 2
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 2
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -2
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: -2
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -2
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -2
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 2
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-  - color: 1
-    side: 1
-    lane: 3
-    type: 3
-    prefab: {fileID: 5312369535451967793, guid: f5d9b350c7ab6f64aaa4cb82045b67ab, type: 3}
-    selectedPrefab: {fileID: 6528095368602631063, guid: b33b6ba566d6e9748bfb6843e30ca034, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 30
-    initialSupport: 45
-    baseMovePatterns:
-    - deltaFile: 1
-      deltaRank: 1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: -1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-  - color: 1
-    side: 0
-    lane: 4
-    type: 4
-    prefab: {fileID: 9150426614146808160, guid: defaeca92e62529438625fc6fcf3eb5c, type: 3}
-    selectedPrefab: {fileID: 2196997112271459474, guid: 615a4d2fbd95dc3409a1ce0c4c49b6bf, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 90
-    initialSupport: 20
-    baseMovePatterns:
-    - deltaFile: 1
-      deltaRank: 0
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 0
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 0
-      deltaRank: 1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 0
-      deltaRank: -1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: 1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: -1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-  - color: 1
-    side: 0
-    lane: 5
-    type: 5
-    prefab: {fileID: 4149312537914271413, guid: 4370ffe93d8167b45abd773fddadd1f3, type: 3}
-    selectedPrefab: {fileID: 5767648109272453294, guid: 84a961da7e73c964db96058c9136b74e, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 0
-    initialSupport: 100
-    baseMovePatterns:
-    - deltaFile: 1
-      deltaRank: 0
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 0
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 0
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 0
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-  - color: 1
-    side: 2
-    lane: 6
-    type: 3
-    prefab: {fileID: 7492916571763379293, guid: 8fcf11a4f1588ea458ca446358bd2dfe, type: 3}
-    selectedPrefab: {fileID: 9173207166039826008, guid: 442124ecb1dbf594c9ca228352eb89ee, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 30
-    initialSupport: 80
-    baseMovePatterns:
-    - deltaFile: 1
-      deltaRank: 1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
       deltaRank: -1
       isSliding: 1
       captureOnly: 0
@@ -3628,73 +3436,13 @@ MonoBehaviour:
       isCannon: 0
   - color: 1
     side: 2
-    lane: 7
-    type: 2
-    prefab: {fileID: 3588832874472523867, guid: b561e5c519448ec429a863b6483222a8, type: 3}
-    selectedPrefab: {fileID: 8738811443025242849, guid: 0190e81ea399b3b4aa7bf52ee0a38518, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 30
-    initialSupport: 65
-    baseMovePatterns:
-    - deltaFile: 1
-      deltaRank: 2
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 2
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 2
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -2
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: -2
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -2
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -2
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 2
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-  - color: 1
-    side: 2
-    lane: 8
     type: 1
     prefab: {fileID: 4995274495810352572, guid: 57d8c66fcebb2564fa41b1a80a537c01, type: 3}
     selectedPrefab: {fileID: 4582762425939913002, guid: eef3aee70c8cad94788805c0e8dc65b4, type: 3}
     sprite: {fileID: 0}
     selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 50
-    initialSupport: 70
+    initialTaxPerTurn: 1
+    initialSupport: 50
     baseMovePatterns:
     - deltaFile: 1
       deltaRank: 0
@@ -3722,246 +3470,369 @@ MonoBehaviour:
       isCannon: 0
   - color: 1
     side: 1
-    lane: 1
-    type: 0
-    prefab: {fileID: 9150426614146808160, guid: defaeca92e62529438625fc6fcf3eb5c, type: 3}
-    selectedPrefab: {fileID: 2196997112271459474, guid: 615a4d2fbd95dc3409a1ce0c4c49b6bf, type: 3}
+    type: 2
+    prefab: {fileID: 8535709498503595591, guid: 5d7faccc648a4094ca2f11dacd6543f9, type: 3}
+    selectedPrefab: {fileID: 3676321374891321833, guid: 4b634d04d2d13bf4d81b06598eb01aef, type: 3}
     sprite: {fileID: 0}
     selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 20
-    initialSupport: 45
+    initialTaxPerTurn: 1
+    initialSupport: 50
     baseMovePatterns:
-    - deltaFile: 0
+    - deltaFile: 1
+      deltaRank: 2
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 2
       deltaRank: 1
       isSliding: 0
       captureOnly: 0
-      moveOnly: 1
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 2
+      deltaRank: -1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
       isCannon: 0
     - deltaFile: 1
-      deltaRank: 1
+      deltaRank: -2
       isSliding: 0
-      captureOnly: 1
+      captureOnly: 0
       moveOnly: 0
       isCannon: 0
     - deltaFile: -1
+      deltaRank: -2
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -2
+      deltaRank: -1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -2
       deltaRank: 1
       isSliding: 0
-      captureOnly: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 2
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+  - color: 1
+    side: 2
+    type: 2
+    prefab: {fileID: 3588832874472523867, guid: b561e5c519448ec429a863b6483222a8, type: 3}
+    selectedPrefab: {fileID: 8738811443025242849, guid: 0190e81ea399b3b4aa7bf52ee0a38518, type: 3}
+    sprite: {fileID: 0}
+    selectedSprite: {fileID: 0}
+    initialTaxPerTurn: 1
+    initialSupport: 50
+    baseMovePatterns:
+    - deltaFile: 1
+      deltaRank: 2
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 2
+      deltaRank: 1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 2
+      deltaRank: -1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 1
+      deltaRank: -2
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: -2
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -2
+      deltaRank: -1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -2
+      deltaRank: 1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 2
+      isSliding: 0
+      captureOnly: 0
       moveOnly: 0
       isCannon: 0
   - color: 1
     side: 1
-    lane: 2
-    type: 0
+    type: 3
+    prefab: {fileID: 5312369535451967793, guid: f5d9b350c7ab6f64aaa4cb82045b67ab, type: 3}
+    selectedPrefab: {fileID: 6528095368602631063, guid: b33b6ba566d6e9748bfb6843e30ca034, type: 3}
+    sprite: {fileID: 0}
+    selectedSprite: {fileID: 0}
+    initialTaxPerTurn: 1
+    initialSupport: 50
+    baseMovePatterns:
+    - deltaFile: 1
+      deltaRank: 1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 1
+      deltaRank: -1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: -1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+  - color: 1
+    side: 2
+    type: 3
+    prefab: {fileID: 7492916571763379293, guid: 8fcf11a4f1588ea458ca446358bd2dfe, type: 3}
+    selectedPrefab: {fileID: 9173207166039826008, guid: 442124ecb1dbf594c9ca228352eb89ee, type: 3}
+    sprite: {fileID: 0}
+    selectedSprite: {fileID: 0}
+    initialTaxPerTurn: 1
+    initialSupport: 50
+    baseMovePatterns:
+    - deltaFile: 1
+      deltaRank: 1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 1
+      deltaRank: -1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: -1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+  - color: 1
+    side: 0
+    type: 4
     prefab: {fileID: 9150426614146808160, guid: defaeca92e62529438625fc6fcf3eb5c, type: 3}
     selectedPrefab: {fileID: 2196997112271459474, guid: 615a4d2fbd95dc3409a1ce0c4c49b6bf, type: 3}
     sprite: {fileID: 0}
     selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 20
-    initialSupport: 40
+    initialTaxPerTurn: 1
+    initialSupport: 50
     baseMovePatterns:
+    - deltaFile: 1
+      deltaRank: 0
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 0
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 0
+      deltaRank: 1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 0
+      deltaRank: -1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 1
+      deltaRank: 1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 1
+      deltaRank: -1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: -1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+  - color: 1
+    side: 0
+    type: 5
+    prefab: {fileID: 4149312537914271413, guid: 4370ffe93d8167b45abd773fddadd1f3, type: 3}
+    selectedPrefab: {fileID: 5767648109272453294, guid: 84a961da7e73c964db96058c9136b74e, type: 3}
+    sprite: {fileID: 0}
+    selectedSprite: {fileID: 0}
+    initialTaxPerTurn: 1
+    initialSupport: 50
+    baseMovePatterns:
+    - deltaFile: 1
+      deltaRank: 0
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 0
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
     - deltaFile: 0
       deltaRank: 1
       isSliding: 0
       captureOnly: 0
-      moveOnly: 1
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 0
+      deltaRank: -1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
       isCannon: 0
     - deltaFile: 1
       deltaRank: 1
       isSliding: 0
-      captureOnly: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 1
+      deltaRank: -1
+      isSliding: 0
+      captureOnly: 0
       moveOnly: 0
       isCannon: 0
     - deltaFile: -1
       deltaRank: 1
       isSliding: 0
-      captureOnly: 1
+      captureOnly: 0
       moveOnly: 0
       isCannon: 0
-  - color: 1
+    - deltaFile: -1
+      deltaRank: -1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+  - color: 2
     side: 1
-    lane: 3
     type: 0
-    prefab: {fileID: 9150426614146808160, guid: defaeca92e62529438625fc6fcf3eb5c, type: 3}
-    selectedPrefab: {fileID: 2196997112271459474, guid: 615a4d2fbd95dc3409a1ce0c4c49b6bf, type: 3}
+    prefab: {fileID: 4631734233524174136, guid: cce9fe5acf6268f41bf512890d24be8d, type: 3}
+    selectedPrefab: {fileID: 4306031803068958632, guid: ef1b7268bd0be324cbbe4477d1cdda23, type: 3}
     sprite: {fileID: 0}
     selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 20
-    initialSupport: 35
+    initialTaxPerTurn: 1
+    initialSupport: 50
     baseMovePatterns:
     - deltaFile: 0
-      deltaRank: 1
+      deltaRank: -1
       isSliding: 0
       captureOnly: 0
       moveOnly: 1
       isCannon: 0
     - deltaFile: 1
-      deltaRank: 1
+      deltaRank: -1
       isSliding: 0
       captureOnly: 1
       moveOnly: 0
       isCannon: 0
     - deltaFile: -1
-      deltaRank: 1
+      deltaRank: -1
       isSliding: 0
       captureOnly: 1
       moveOnly: 0
       isCannon: 0
-  - color: 1
-    side: 1
-    lane: 4
-    type: 0
-    prefab: {fileID: 9150426614146808160, guid: defaeca92e62529438625fc6fcf3eb5c, type: 3}
-    selectedPrefab: {fileID: 2196997112271459474, guid: 615a4d2fbd95dc3409a1ce0c4c49b6bf, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 20
-    initialSupport: 30
-    baseMovePatterns:
-    - deltaFile: 0
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 1
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-  - color: 1
+  - color: 2
     side: 2
-    lane: 5
     type: 0
-    prefab: {fileID: 4149312537914271413, guid: 4370ffe93d8167b45abd773fddadd1f3, type: 3}
-    selectedPrefab: {fileID: 5767648109272453294, guid: 84a961da7e73c964db96058c9136b74e, type: 3}
+    prefab: {fileID: 1099755255627000572, guid: 5beaba7d851b80642ad618a849eac54b, type: 3}
+    selectedPrefab: {fileID: 7515130414010391330, guid: 984f4378735913a4a9e5bbcfc24ae9f9, type: 3}
     sprite: {fileID: 0}
     selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 20
-    initialSupport: 70
+    initialTaxPerTurn: 1
+    initialSupport: 50
     baseMovePatterns:
     - deltaFile: 0
-      deltaRank: 1
+      deltaRank: -1
       isSliding: 0
       captureOnly: 0
       moveOnly: 1
       isCannon: 0
     - deltaFile: 1
-      deltaRank: 1
+      deltaRank: -1
       isSliding: 0
       captureOnly: 1
       moveOnly: 0
       isCannon: 0
     - deltaFile: -1
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-  - color: 1
-    side: 2
-    lane: 6
-    type: 0
-    prefab: {fileID: 4149312537914271413, guid: 4370ffe93d8167b45abd773fddadd1f3, type: 3}
-    selectedPrefab: {fileID: 5767648109272453294, guid: 84a961da7e73c964db96058c9136b74e, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 20
-    initialSupport: 65
-    baseMovePatterns:
-    - deltaFile: 0
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 1
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-  - color: 1
-    side: 2
-    lane: 7
-    type: 0
-    prefab: {fileID: 4149312537914271413, guid: 4370ffe93d8167b45abd773fddadd1f3, type: 3}
-    selectedPrefab: {fileID: 5767648109272453294, guid: 84a961da7e73c964db96058c9136b74e, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 20
-    initialSupport: 60
-    baseMovePatterns:
-    - deltaFile: 0
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 1
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-  - color: 1
-    side: 2
-    lane: 8
-    type: 0
-    prefab: {fileID: 4149312537914271413, guid: 4370ffe93d8167b45abd773fddadd1f3, type: 3}
-    selectedPrefab: {fileID: 5767648109272453294, guid: 84a961da7e73c964db96058c9136b74e, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 20
-    initialSupport: 55
-    baseMovePatterns:
-    - deltaFile: 0
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 1
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 1
+      deltaRank: -1
       isSliding: 0
       captureOnly: 1
       moveOnly: 0
       isCannon: 0
   - color: 2
     side: 1
-    lane: 1
     type: 1
     prefab: {fileID: 4631734233524174136, guid: cce9fe5acf6268f41bf512890d24be8d, type: 3}
     selectedPrefab: {fileID: 4306031803068958632, guid: ef1b7268bd0be324cbbe4477d1cdda23, type: 3}
     sprite: {fileID: 0}
     selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 50
-    initialSupport: 30
+    initialTaxPerTurn: 1
+    initialSupport: 50
     baseMovePatterns:
     - deltaFile: 1
       deltaRank: 0
@@ -3982,253 +3853,6 @@ MonoBehaviour:
       moveOnly: 0
       isCannon: 0
     - deltaFile: 0
-      deltaRank: -1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-  - color: 2
-    side: 1
-    lane: 2
-    type: 2
-    prefab: {fileID: 4631734233524174136, guid: cce9fe5acf6268f41bf512890d24be8d, type: 3}
-    selectedPrefab: {fileID: 4306031803068958632, guid: ef1b7268bd0be324cbbe4477d1cdda23, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 30
-    initialSupport: 15
-    baseMovePatterns:
-    - deltaFile: 1
-      deltaRank: 2
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 2
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 2
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -2
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: -2
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -2
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -2
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 2
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-  - color: 2
-    side: 1
-    lane: 3
-    type: 3
-    prefab: {fileID: 2464878976777393409, guid: b512c74cc1f090c4fb21256c5cecf8ff, type: 3}
-    selectedPrefab: {fileID: 6241014130030054132, guid: 92cf23bb8cd4ba744955119a7482bc7a, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 30
-    initialSupport: 45
-    baseMovePatterns:
-    - deltaFile: 1
-      deltaRank: 1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: -1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-  - color: 2
-    side: 0
-    lane: 4
-    type: 4
-    prefab: {fileID: 4631734233524174136, guid: cce9fe5acf6268f41bf512890d24be8d, type: 3}
-    selectedPrefab: {fileID: 4306031803068958632, guid: ef1b7268bd0be324cbbe4477d1cdda23, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 90
-    initialSupport: 20
-    baseMovePatterns:
-    - deltaFile: 1
-      deltaRank: 0
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 0
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 0
-      deltaRank: 1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 0
-      deltaRank: -1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: 1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: -1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-  - color: 2
-    side: 0
-    lane: 5
-    type: 5
-    prefab: {fileID: 1099755255627000572, guid: 5beaba7d851b80642ad618a849eac54b, type: 3}
-    selectedPrefab: {fileID: 7515130414010391330, guid: 984f4378735913a4a9e5bbcfc24ae9f9, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 0
-    initialSupport: 100
-    baseMovePatterns:
-    - deltaFile: 1
-      deltaRank: 0
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 0
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 0
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 0
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-  - color: 2
-    side: 2
-    lane: 6
-    type: 3
-    prefab: {fileID: 2464878976777393409, guid: b512c74cc1f090c4fb21256c5cecf8ff, type: 3}
-    selectedPrefab: {fileID: 6241014130030054132, guid: 92cf23bb8cd4ba744955119a7482bc7a, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 30
-    initialSupport: 80
-    baseMovePatterns:
-    - deltaFile: 1
-      deltaRank: 1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 1
-      isSliding: 1
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
       deltaRank: -1
       isSliding: 1
       captureOnly: 0
@@ -4236,73 +3860,13 @@ MonoBehaviour:
       isCannon: 0
   - color: 2
     side: 2
-    lane: 7
-    type: 2
-    prefab: {fileID: 7913330249618804860, guid: 1f8b8fbbde21b84469042848b604185b, type: 3}
-    selectedPrefab: {fileID: 4098026832333284529, guid: 0e8908fb2ce253e47a1d47794d7ab962, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 30
-    initialSupport: 65
-    baseMovePatterns:
-    - deltaFile: 1
-      deltaRank: 2
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 2
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 2
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -2
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: -2
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -2
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -2
-      deltaRank: 1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: 2
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 0
-      isCannon: 0
-  - color: 2
-    side: 2
-    lane: 8
     type: 1
     prefab: {fileID: 5255282578188673807, guid: a34f4e0912586014c9bc20075c2d0ec3, type: 3}
     selectedPrefab: {fileID: 3203341032024986853, guid: 2d06bcf7a40c5104698deecd29aefd9d, type: 3}
     sprite: {fileID: 0}
     selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 50
-    initialSupport: 70
+    initialTaxPerTurn: 1
+    initialSupport: 50
     baseMovePatterns:
     - deltaFile: 1
       deltaRank: 0
@@ -4330,234 +3894,302 @@ MonoBehaviour:
       isCannon: 0
   - color: 2
     side: 1
-    lane: 1
-    type: 0
+    type: 2
     prefab: {fileID: 4631734233524174136, guid: cce9fe5acf6268f41bf512890d24be8d, type: 3}
     selectedPrefab: {fileID: 4306031803068958632, guid: ef1b7268bd0be324cbbe4477d1cdda23, type: 3}
     sprite: {fileID: 0}
     selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 20
-    initialSupport: 45
+    initialTaxPerTurn: 1
+    initialSupport: 50
     baseMovePatterns:
-    - deltaFile: 0
+    - deltaFile: 1
+      deltaRank: 2
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 2
+      deltaRank: 1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 2
       deltaRank: -1
       isSliding: 0
       captureOnly: 0
-      moveOnly: 1
+      moveOnly: 0
       isCannon: 0
     - deltaFile: 1
-      deltaRank: -1
+      deltaRank: -2
       isSliding: 0
-      captureOnly: 1
+      captureOnly: 0
       moveOnly: 0
       isCannon: 0
     - deltaFile: -1
+      deltaRank: -2
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -2
       deltaRank: -1
       isSliding: 0
-      captureOnly: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -2
+      deltaRank: 1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 2
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+  - color: 2
+    side: 2
+    type: 2
+    prefab: {fileID: 7913330249618804860, guid: 1f8b8fbbde21b84469042848b604185b, type: 3}
+    selectedPrefab: {fileID: 4098026832333284529, guid: 0e8908fb2ce253e47a1d47794d7ab962, type: 3}
+    sprite: {fileID: 0}
+    selectedSprite: {fileID: 0}
+    initialTaxPerTurn: 1
+    initialSupport: 50
+    baseMovePatterns:
+    - deltaFile: 1
+      deltaRank: 2
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 2
+      deltaRank: 1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 2
+      deltaRank: -1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 1
+      deltaRank: -2
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: -2
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -2
+      deltaRank: -1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -2
+      deltaRank: 1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 2
+      isSliding: 0
+      captureOnly: 0
       moveOnly: 0
       isCannon: 0
   - color: 2
     side: 1
-    lane: 2
-    type: 0
+    type: 3
+    prefab: {fileID: 2464878976777393409, guid: b512c74cc1f090c4fb21256c5cecf8ff, type: 3}
+    selectedPrefab: {fileID: 6241014130030054132, guid: 92cf23bb8cd4ba744955119a7482bc7a, type: 3}
+    sprite: {fileID: 0}
+    selectedSprite: {fileID: 0}
+    initialTaxPerTurn: 1
+    initialSupport: 50
+    baseMovePatterns:
+    - deltaFile: 1
+      deltaRank: 1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 1
+      deltaRank: -1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: -1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+  - color: 2
+    side: 2
+    type: 3
+    prefab: {fileID: 2464878976777393409, guid: b512c74cc1f090c4fb21256c5cecf8ff, type: 3}
+    selectedPrefab: {fileID: 6241014130030054132, guid: 92cf23bb8cd4ba744955119a7482bc7a, type: 3}
+    sprite: {fileID: 0}
+    selectedSprite: {fileID: 0}
+    initialTaxPerTurn: 1
+    initialSupport: 50
+    baseMovePatterns:
+    - deltaFile: 1
+      deltaRank: 1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 1
+      deltaRank: -1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: -1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+  - color: 2
+    side: 0
+    type: 4
     prefab: {fileID: 4631734233524174136, guid: cce9fe5acf6268f41bf512890d24be8d, type: 3}
     selectedPrefab: {fileID: 4306031803068958632, guid: ef1b7268bd0be324cbbe4477d1cdda23, type: 3}
     sprite: {fileID: 0}
     selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 20
-    initialSupport: 40
+    initialTaxPerTurn: 1
+    initialSupport: 50
     baseMovePatterns:
+    - deltaFile: 1
+      deltaRank: 0
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 0
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 0
+      deltaRank: 1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
     - deltaFile: 0
       deltaRank: -1
-      isSliding: 0
+      isSliding: 1
       captureOnly: 0
-      moveOnly: 1
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 1
+      deltaRank: 1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
       isCannon: 0
     - deltaFile: 1
       deltaRank: -1
-      isSliding: 0
-      captureOnly: 1
+      isSliding: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 1
+      isSliding: 1
+      captureOnly: 0
       moveOnly: 0
       isCannon: 0
     - deltaFile: -1
       deltaRank: -1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-  - color: 2
-    side: 1
-    lane: 3
-    type: 0
-    prefab: {fileID: 4631734233524174136, guid: cce9fe5acf6268f41bf512890d24be8d, type: 3}
-    selectedPrefab: {fileID: 4306031803068958632, guid: ef1b7268bd0be324cbbe4477d1cdda23, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 20
-    initialSupport: 35
-    baseMovePatterns:
-    - deltaFile: 0
-      deltaRank: -1
-      isSliding: 0
+      isSliding: 1
       captureOnly: 0
-      moveOnly: 1
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 1
       moveOnly: 0
       isCannon: 0
   - color: 2
-    side: 1
-    lane: 4
-    type: 0
-    prefab: {fileID: 4631734233524174136, guid: cce9fe5acf6268f41bf512890d24be8d, type: 3}
-    selectedPrefab: {fileID: 4306031803068958632, guid: ef1b7268bd0be324cbbe4477d1cdda23, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 20
-    initialSupport: 30
-    baseMovePatterns:
-    - deltaFile: 0
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 1
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-  - color: 2
-    side: 2
-    lane: 5
-    type: 0
+    side: 0
+    type: 5
     prefab: {fileID: 1099755255627000572, guid: 5beaba7d851b80642ad618a849eac54b, type: 3}
     selectedPrefab: {fileID: 7515130414010391330, guid: 984f4378735913a4a9e5bbcfc24ae9f9, type: 3}
     sprite: {fileID: 0}
     selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 20
-    initialSupport: 70
+    initialTaxPerTurn: 1
+    initialSupport: 50
     baseMovePatterns:
+    - deltaFile: 1
+      deltaRank: 0
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 0
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 0
+      deltaRank: 1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
     - deltaFile: 0
       deltaRank: -1
       isSliding: 0
       captureOnly: 0
-      moveOnly: 1
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: 1
+      deltaRank: 1
+      isSliding: 0
+      captureOnly: 0
+      moveOnly: 0
       isCannon: 0
     - deltaFile: 1
       deltaRank: -1
       isSliding: 0
-      captureOnly: 1
+      captureOnly: 0
+      moveOnly: 0
+      isCannon: 0
+    - deltaFile: -1
+      deltaRank: 1
+      isSliding: 0
+      captureOnly: 0
       moveOnly: 0
       isCannon: 0
     - deltaFile: -1
       deltaRank: -1
       isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-  - color: 2
-    side: 2
-    lane: 6
-    type: 0
-    prefab: {fileID: 1099755255627000572, guid: 5beaba7d851b80642ad618a849eac54b, type: 3}
-    selectedPrefab: {fileID: 7515130414010391330, guid: 984f4378735913a4a9e5bbcfc24ae9f9, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 20
-    initialSupport: 65
-    baseMovePatterns:
-    - deltaFile: 0
-      deltaRank: -1
-      isSliding: 0
       captureOnly: 0
-      moveOnly: 1
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-  - color: 2
-    side: 2
-    lane: 7
-    type: 0
-    prefab: {fileID: 1099755255627000572, guid: 5beaba7d851b80642ad618a849eac54b, type: 3}
-    selectedPrefab: {fileID: 7515130414010391330, guid: 984f4378735913a4a9e5bbcfc24ae9f9, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 20
-    initialSupport: 60
-    baseMovePatterns:
-    - deltaFile: 0
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 1
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-  - color: 2
-    side: 2
-    lane: 8
-    type: 0
-    prefab: {fileID: 1099755255627000572, guid: 5beaba7d851b80642ad618a849eac54b, type: 3}
-    selectedPrefab: {fileID: 7515130414010391330, guid: 984f4378735913a4a9e5bbcfc24ae9f9, type: 3}
-    sprite: {fileID: 0}
-    selectedSprite: {fileID: 0}
-    initialTaxPerTurn: 20
-    initialSupport: 55
-    baseMovePatterns:
-    - deltaFile: 0
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 0
-      moveOnly: 1
-      isCannon: 0
-    - deltaFile: 1
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 1
-      moveOnly: 0
-      isCannon: 0
-    - deltaFile: -1
-      deltaRank: -1
-      isSliding: 0
-      captureOnly: 1
       moveOnly: 0
       isCannon: 0
 --- !u!1 &762209653
@@ -7805,6 +7437,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b43f32c83ea8c447b6a0cd340e9a47b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MMBGame.BoardViewController
+  viewRoot: {fileID: 1852681869}
+  rotationSpeed: 0.35
+  shortcutRotationStep: 15
+  zoomSpeed: 0.08
+  shortcutZoomStep: 0.12
+  minScale: 0.55
+  maxScale: 1.85
+  rotationZ: 0
+  scale: 1
+  previousPointerPosition: {x: 0, y: 0}
+  previousZoomPointerPosition: {x: 0, y: 0}
+  isDragging: 0
+  isZoomDragging: 0
 --- !u!1 &1964787348
 GameObject:
   m_ObjectHideFlags: 0

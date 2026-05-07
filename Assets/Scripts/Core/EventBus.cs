@@ -26,6 +26,7 @@ namespace MMBGame
         public event Action<ChessPiece> OnMovementRefused;
         public event Action<ChessPiece> OnRebellionTriggered;
         public event Action<ChessPiece> OnDefectionTriggered;
+        public event Action<ChessPiece, int, string> OnSupportChanged;
         public event Action<PieceColor, string> OnActionExecuted;
         public event Action<ChessPiece> OnIntelligenceGathered;
         public event Action<string> OnReconResult;
@@ -68,6 +69,11 @@ namespace MMBGame
         public void PublishDefectionTriggered(ChessPiece piece)
         {
             OnDefectionTriggered?.Invoke(piece);
+        }
+
+        public void PublishSupportChanged(ChessPiece piece, int delta, string reason)
+        {
+            OnSupportChanged?.Invoke(piece, delta, reason);
         }
 
         public void PublishActionExecuted(PieceColor color, string actionName)

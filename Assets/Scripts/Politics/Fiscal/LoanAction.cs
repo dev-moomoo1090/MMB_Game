@@ -37,7 +37,7 @@ namespace MMBGame
 
             int repayAmount = (int)(inputValue * (1f + INTEREST_RATE));
             int turnsRemaining = System.Math.Max(1, inputValue / System.Math.Max(1, candidate.taxPerTurn));
-            candidate.support += System.Math.Max(1, inputValue / 20);
+            PoliticalStatService.ChangeSupport(candidate, System.Math.Max(1, inputValue / 20), ActionName);
             activeLoans.Add((candidate, inputValue, repayAmount, turnsRemaining));
             return true;
         }

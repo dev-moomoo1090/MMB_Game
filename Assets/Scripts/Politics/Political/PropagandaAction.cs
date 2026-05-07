@@ -33,7 +33,7 @@ namespace MMBGame
                 ChessPiece piece = pieces[i];
                 if (piece != null && piece.color == actorColor)
                 {
-                    piece.support += Math.Max(1, piece.support / 20);
+                    PoliticalStatService.ChangeSupport(piece, Math.Max(1, piece.support / 20), ActionName);
                 }
             }
 

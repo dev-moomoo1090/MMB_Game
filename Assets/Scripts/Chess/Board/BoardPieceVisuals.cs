@@ -185,6 +185,7 @@ namespace MMBGame
                 return null;
             }
 
+            PieceSetupDefinition sideDefinition = null;
             PieceSetupDefinition fallbackDefinition = null;
             for (int i = 0; i < definitions.Count; i++)
             {
@@ -194,18 +195,23 @@ namespace MMBGame
                     continue;
                 }
 
-                if (definition.side == piece.side)
+                if (piece.lane != PieceLane.None && definition.lane == piece.lane)
                 {
                     return definition;
                 }
 
-                if (definition.side == PieceSide.None)
+                if (definition.side == piece.side && definition.lane == PieceLane.None)
+                {
+                    sideDefinition = definition;
+                }
+
+                if (definition.side == PieceSide.None && definition.lane == PieceLane.None)
                 {
                     fallbackDefinition = definition;
                 }
             }
 
-            return fallbackDefinition;
+            return sideDefinition ?? fallbackDefinition;
         }
 
         private Vector3 GetBoardPosition(int file, int rank)

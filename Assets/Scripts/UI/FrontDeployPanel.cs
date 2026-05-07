@@ -226,7 +226,7 @@ namespace MMBGame
                 return null;
             }
 
-            PieceSetupDefinition def = setupManager.GetPieceDefinition(piece.color, piece.side, piece.type);
+            PieceSetupDefinition def = setupManager.GetPieceDefinition(piece.color, piece.side, piece.type, piece.lane);
             return def?.sprite;
         }
 

@@ -151,5 +151,10 @@ namespace MMBGame
         {
             return IsBenevolent(color) ? 0.5f : 1f;
         }
+
+        public static int GetAcceptanceWeightModifier(PieceColor color)
+        {
+            return IsTyrant(color) ? 400 : 0;
+        }
     }
 }

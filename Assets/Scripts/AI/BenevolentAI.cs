@@ -226,7 +226,7 @@ namespace MMBGame.AI
         // ─────────────────────────────────────────────────────────────────
         private void ExecuteMilitaryPhase()
         {
-            var movable = _ctx.GetActivePieces(_side)
+            var movable = _ctx.GetControlledActivePieces(_side)
                 .Where(p => !p.isOffBoard && !_ctx.IsSpecial(p))
                 .ToList();
 

@@ -30,7 +30,7 @@ namespace MMBGame
             }
 
             ChessPiece target = state.GetPiece(targetFile, targetRank);
-            if (target == null || (!IsObstacle(target) && target.color != piece.color))
+            if (target == null || (!IsObstacle(target) && target.GetMovementControllerColor() != piece.GetMovementControllerColor()))
             {
                 moves.Add(new Move(piece.file, piece.rank, targetFile, targetRank));
             }
@@ -70,7 +70,7 @@ namespace MMBGame
                                 break;
                             }
 
-                            if (target.color != piece.color && !pat.moveOnly)
+                            if (target.GetMovementControllerColor() != piece.GetMovementControllerColor() && !pat.moveOnly)
                                 moves.Add(new Move(piece.file, piece.rank, f, r));
                             break;
                         }
@@ -83,7 +83,7 @@ namespace MMBGame
                     ChessPiece target = state.GetPiece(f, r);
                     if (target == null && !pat.captureOnly)
                         moves.Add(new Move(piece.file, piece.rank, f, r));
-                    else if (target != null && !IsObstacle(target) && target.color != piece.color && !pat.moveOnly)
+                    else if (target != null && !IsObstacle(target) && target.GetMovementControllerColor() != piece.GetMovementControllerColor() && !pat.moveOnly)
                         moves.Add(new Move(piece.file, piece.rank, f, r));
                 }
             }
@@ -123,7 +123,7 @@ namespace MMBGame
                     continue;
                 }
 
-                if (target.color != piece.color && !pattern.moveOnly)
+                if (target.GetMovementControllerColor() != piece.GetMovementControllerColor() && !pattern.moveOnly)
                 {
                     moves.Add(new Move(piece.file, piece.rank, file, rank));
                 }
@@ -139,9 +139,10 @@ namespace MMBGame
 
         private static void GeneratePawnMoves(BoardState state, ChessPiece pawn, List<Move> moves)
         {
-            int dir = pawn.color == PieceColor.White ? 1 : -1;
-            int startFile = pawn.color == PieceColor.White ? 1 : 6;
-            int promoFile = pawn.color == PieceColor.White ? 7 : 0;
+            PieceColor moveColor = pawn.GetMovementControllerColor();
+            int dir = moveColor == PieceColor.White ? 1 : -1;
+            int startFile = moveColor == PieceColor.White ? 1 : 6;
+            int promoFile = moveColor == PieceColor.White ? 7 : 0;
             int fwd = pawn.file + dir;
 
             if (state.IsInBounds(fwd, pawn.rank) && state.GetPiece(fwd, pawn.rank) == null)
@@ -161,7 +162,7 @@ namespace MMBGame
                 int cr = pawn.rank + dr;
                 if (!state.IsInBounds(fwd, cr)) continue;
                 ChessPiece target = state.GetPiece(fwd, cr);
-                if (target != null && !IsObstacle(target) && target.color != pawn.color)
+                if (target != null && !IsObstacle(target) && target.GetMovementControllerColor() != pawn.GetMovementControllerColor())
                 {
                     if (fwd == promoFile) AddPromotionMoves(moves, pawn.file, pawn.rank, fwd, cr);
                     else moves.Add(new Move(pawn.file, pawn.rank, fwd, cr));
@@ -184,8 +185,9 @@ namespace MMBGame
             GeneratePatternMoves(state, king, moves);
             if (king.hasMoved) return;
             int file = king.file;
-            bool ksRight = king.color == PieceColor.White ? state.whiteKingsideCastle : state.blackKingsideCastle;
-            bool qsRight = king.color == PieceColor.White ? state.whiteQueensideCastle : state.blackQueensideCastle;
+            PieceColor moveColor = king.GetMovementControllerColor();
+            bool ksRight = moveColor == PieceColor.White ? state.whiteKingsideCastle : state.blackKingsideCastle;
+            bool qsRight = moveColor == PieceColor.White ? state.whiteQueensideCastle : state.blackQueensideCastle;
             if (ksRight && state.GetPiece(file, 5) == null && state.GetPiece(file, 6) == null)
             {
                 var rook = state.GetPiece(file, 7);

@@ -11,11 +11,14 @@ namespace MMBGame
             boardManager = FindObjectOfType<BoardManager>();
             EventBus.Instance.OnPhaseChanged -= HandlePhaseChanged;
             EventBus.Instance.OnPhaseChanged += HandlePhaseChanged;
+            EventBus.Instance.OnSupportChanged -= HandleSupportChanged;
+            EventBus.Instance.OnSupportChanged += HandleSupportChanged;
         }
 
         private void OnDestroy()
         {
             EventBus.Instance.OnPhaseChanged -= HandlePhaseChanged;
+            EventBus.Instance.OnSupportChanged -= HandleSupportChanged;
         }
 
         private void HandlePhaseChanged(GamePhase phase)
@@ -26,6 +29,16 @@ namespace MMBGame
             }
 
             CheckAllPieces();
+        }
+
+        private void HandleSupportChanged(ChessPiece piece, int delta, string reason)
+        {
+            if (delta >= 0 || boardManager == null || boardManager.BoardState == null || piece == null)
+            {
+                return;
+            }
+
+            RollImmediateRebellion(piece);
         }
 
         private void CheckAllPieces()
@@ -53,9 +66,8 @@ namespace MMBGame
 
         private void CheckRebellion(ChessPiece piece)
         {
-            float defectionChance = (10 - piece.support) * 2f + (-piece.disposition) * 0.1f;
-            defectionChance = ApplyKingStateDefectionModifiers(piece, defectionChance);
-            defectionChance = Mathf.Clamp(defectionChance, 0f, 80f);
+            BoardState state = boardManager.BoardState;
+            float defectionChance = GetDefectionChance(piece, state);
 
             if (defectionChance > 0f)
             {
@@ -64,6 +76,7 @@ namespace MMBGame
                 {
                     piece.color = piece.color == PieceColor.White ? PieceColor.Black : PieceColor.White;
                     piece.side = PieceSideResolver.Resolve(piece.type, piece.rank);
+                    piece.movementControllerColor = piece.color;
                     piece.isBetrayed = true;
                     boardManager.RefreshPieceVisuals();
                     EventBus.Instance.PublishDefectionTriggered(piece);
@@ -71,14 +84,7 @@ namespace MMBGame
                 }
             }
 
-            float rebellionChance = (20 - piece.support) * 1.5f;
-            rebellionChance += piece.rebellionWeight * 10f;
-            if (KingStateEvaluator.IsTyrant(piece.color))
-            {
-                rebellionChance += 30f;
-            }
-
-            rebellionChance = Mathf.Clamp(rebellionChance, 0f, 60f);
+            float rebellionChance = GetRebellionChance(piece, state);
 
             if (rebellionChance <= 0f)
             {
@@ -88,34 +94,84 @@ namespace MMBGame
             float rebellionRoll = Random.Range(0f, 100f);
             if (rebellionRoll < rebellionChance)
             {
-                if (piece.isOffBoard)
-                {
-                    boardManager.FrontDeploy(piece);
-                }
-
-                EventBus.Instance.PublishRebellionTriggered(piece);
+                TriggerRebellion(piece);
             }
         }
 
-        private float ApplyKingStateDefectionModifiers(ChessPiece piece, float defectionChance)
+        private void RollImmediateRebellion(ChessPiece piece)
         {
+            float rebellionChance = GetRebellionChance(piece, boardManager.BoardState);
+            if (rebellionChance <= 0f || Random.Range(0f, 100f) >= rebellionChance)
+            {
+                return;
+            }
+
+            TriggerRebellion(piece);
+        }
+
+        private void TriggerRebellion(ChessPiece piece)
+        {
+            piece.rebellionSuccessCount += 1;
+            if (piece.rebellionSuccessCount >= 3)
+            {
+                piece.rebellionWeight = Mathf.Max(piece.rebellionWeight, 1f);
+                piece.movementControllerColor = piece.color == PieceColor.White ? PieceColor.Black : PieceColor.White;
+            }
+
+            if (piece.isOffBoard)
+            {
+                boardManager.FrontDeploy(piece);
+            }
+
+            boardManager.RefreshPieceVisuals();
+            EventBus.Instance.PublishRebellionTriggered(piece);
+        }
+
+        public static float GetDefectionChance(ChessPiece piece, BoardState state)
+        {
+            if (piece == null)
+            {
+                return 0f;
+            }
+
+            float chance = 30 - piece.support;
+            chance += state != null ? state.globalDefectionWeight : 0;
+            chance += piece.defectionWeight;
             PieceColor opponent = piece.color == PieceColor.White ? PieceColor.Black : PieceColor.White;
             if (KingStateEvaluator.IsBenevolent(piece.color))
             {
-                defectionChance -= 20f;
+                chance -= 20f;
             }
 
             if (KingStateEvaluator.IsBenevolent(opponent))
             {
-                defectionChance += 10f;
+                chance += 10f;
             }
 
             if (KingStateEvaluator.IsTyrant(piece.color))
             {
-                defectionChance += 30f;
+                chance += 30f;
             }
 
-            return defectionChance;
+            return Mathf.Clamp(chance, 0f, 100f);
+        }
+
+        public static float GetRebellionChance(ChessPiece piece, BoardState state)
+        {
+            if (piece == null)
+            {
+                return 0f;
+            }
+
+            float chance = 20 - piece.support;
+            chance += state != null ? state.globalRebellionWeight : 0;
+            chance += piece.rebellionWeight;
+            if (KingStateEvaluator.IsTyrant(piece.color))
+            {
+                chance += 30f;
+            }
+
+            return Mathf.Clamp(chance, 0f, 100f);
         }
     }
 }

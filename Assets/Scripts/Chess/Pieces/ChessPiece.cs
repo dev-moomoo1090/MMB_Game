@@ -15,6 +15,8 @@ namespace MMBGame
         public float rebellionWeight;
         public PieceColor color;
         public PieceSide side;
+        public PieceLane lane;
+        public PieceColor movementControllerColor;
         public PieceType type;
         public int file;
         public int rank;
@@ -27,6 +29,8 @@ namespace MMBGame
         public int punishCount;
         public int disposition;
         public int acceptWeight;
+        public int defectionWeight;
+        public int rebellionSuccessCount;
 
         protected ChessPiece(PieceColor color, PieceType type, int file, int rank)
         {
@@ -35,6 +39,8 @@ namespace MMBGame
             this.file = file;
             this.rank = rank;
             side = PieceSideResolver.Resolve(type, rank);
+            lane = PieceSideResolver.ResolveLane(type, rank);
+            movementControllerColor = color;
             support = 50;
             taxPerTurn = 1;
             taxModifier = 1;
@@ -47,6 +53,8 @@ namespace MMBGame
             punishCount = 0;
             disposition = 0;
             acceptWeight = 50;
+            defectionWeight = 0;
+            rebellionSuccessCount = 0;
             originalMovePatterns = new List<MovePattern>();
             currentMovePatterns = new List<MovePattern>();
             oneTimeMovePatterns = new List<MovePattern>();
@@ -106,6 +114,8 @@ namespace MMBGame
             target.taxPerTurn = taxPerTurn;
             target.rebellionWeight = rebellionWeight;
             target.side = side;
+            target.lane = lane;
+            target.movementControllerColor = movementControllerColor;
             target.taxModifier = taxModifier;
             target.isOffBoard = isOffBoard;
             target.offBoardOrigin = offBoardOrigin;
@@ -115,6 +125,8 @@ namespace MMBGame
             target.punishCount = punishCount;
             target.disposition = disposition;
             target.acceptWeight = acceptWeight;
+            target.defectionWeight = defectionWeight;
+            target.rebellionSuccessCount = rebellionSuccessCount;
             CopyPatterns(originalMovePatterns, target.originalMovePatterns);
             CopyPatterns(currentMovePatterns, target.currentMovePatterns);
             CopyPatterns(oneTimeMovePatterns, target.oneTimeMovePatterns);
@@ -158,6 +170,11 @@ namespace MMBGame
         public int GetEffectiveTax()
         {
             return taxPerTurn * taxModifier;
+        }
+
+        public PieceColor GetMovementControllerColor()
+        {
+            return movementControllerColor == PieceColor.None ? color : movementControllerColor;
         }
 
         public void ResetTurnModifiers()

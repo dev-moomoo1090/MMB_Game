@@ -34,6 +34,9 @@ namespace MMBGame.AI
         public List<ChessPiece> GetActivePieces(PieceColor color)
             => BoardState.GetAllPieces().Where(p => p.color == color).ToList();
 
+        public List<ChessPiece> GetControlledActivePieces(PieceColor color)
+            => BoardState.GetAllPieces().Where(p => p.GetMovementControllerColor() == color).ToList();
+
         public PlayerState GetPlayerState(PieceColor color)
             => _gm.PoliticsManager.GetCurrentPlayer(color);
 

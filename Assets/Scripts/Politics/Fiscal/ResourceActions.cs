@@ -18,7 +18,7 @@ namespace MMBGame
                 return false;
             }
 
-            targetPiece.support += System.Math.Max(1, inputValue / System.Math.Max(1, targetPiece.taxPerTurn));
+            PoliticalStatService.ChangeSupport(targetPiece, System.Math.Max(1, inputValue / System.Math.Max(1, targetPiece.taxPerTurn)), ActionName);
             return true;
         }
     }
@@ -36,7 +36,7 @@ namespace MMBGame
                 return false;
             }
 
-            targetPiece.support -= System.Math.Max(1, inputValue / System.Math.Max(1, targetPiece.taxPerTurn));
+            PoliticalStatService.ChangeSupport(targetPiece, -System.Math.Max(1, inputValue / System.Math.Max(1, targetPiece.taxPerTurn)), ActionName);
             actor.AddGold(inputValue);
             return true;
         }

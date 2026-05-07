@@ -32,7 +32,7 @@ namespace MMBGame
                     ChessPiece piece = pieces[i];
                     if (piece != null && piece.color == actorColor)
                     {
-                        piece.support -= basePenalty;
+                        PoliticalStatService.ChangeSupport(piece, -basePenalty, ActionName);
                     }
                 }
 
@@ -93,7 +93,7 @@ namespace MMBGame
 
             Pawn pawn = new Pawn(color, file, rank);
             pawn.pieceName = color == PieceColor.White ? "White Execution Pawn" : "Black Execution Pawn";
-            pawn.support = 50;
+            PoliticalStatService.SetSupport(pawn, 50);
             pawn.taxPerTurn = 0;
             state.squares[file, rank].piece = pawn;
             return true;
