@@ -78,3 +78,12 @@ crashlytics-build.properties
 # Local engine binaries are too large for regular Git.
 /[Aa]ssets/[Ss]treamingAssets/[Ee]ngines/*.exe
 /[Aa]ssets/[Ss]treamingAssets/[Ee]ngines/*.exe.meta
+
+# AI / assistant files
+AGENTS.md
+CLAUDE.md
+CODEX_HANDOFF.md
+TODO.md
+
+# Visual Studio / temp
+*.slnx
