@@ -34,7 +34,7 @@ namespace MMBGame
             this.type = type;
             this.file = file;
             this.rank = rank;
-            side = PieceSideResolver.Resolve(type, file);
+            side = PieceSideResolver.Resolve(type, rank);
             support = 50;
             taxPerTurn = 1;
             taxModifier = 1;

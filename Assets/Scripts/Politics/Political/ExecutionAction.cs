@@ -16,20 +16,32 @@ namespace MMBGame
             }
 
             int legitimacyFactor = 5 - target.punishCount;
+            bool isTyrant = KingStateEvaluator.IsTyrant(actorColor);
             int basePenalty = Math.Max(1, legitimacyFactor * legitimacyFactor / 3);
-            BoardState state = manager.BoardManager.BoardState;
-            System.Collections.Generic.List<ChessPiece> pieces = state.GetAllPieces();
-            for (int i = 0; i < pieces.Count; i++)
+            if (isTyrant)
             {
-                ChessPiece piece = pieces[i];
-                if (piece != null && piece.color == actorColor)
-                {
-                    piece.support -= basePenalty;
-                }
+                basePenalty = (int)Math.Ceiling(basePenalty * 0.2f);
             }
 
-            PlayerState actor = manager.GetActorState(actorColor);
-            actor?.AddHonor(-basePenalty);
+            BoardState state = manager.BoardManager.BoardState;
+            if (basePenalty > 0)
+            {
+                System.Collections.Generic.List<ChessPiece> pieces = state.GetAllPieces();
+                for (int i = 0; i < pieces.Count; i++)
+                {
+                    ChessPiece piece = pieces[i];
+                    if (piece != null && piece.color == actorColor)
+                    {
+                        piece.support -= basePenalty;
+                    }
+                }
+
+                PlayerState actor = manager.GetActorState(actorColor);
+                actor?.AddHonor(-basePenalty);
+            }
+
+            int summonFile = target.isOffBoard ? target.offBoardOrigin.col : target.file;
+            int summonRank = target.isOffBoard ? target.offBoardOrigin.row : target.rank;
             target.ClearOneTimeMovePatterns();
             EventBus.Instance.PublishPieceCapturePending(target);
             if (target.isOffBoard)
@@ -40,6 +52,50 @@ namespace MMBGame
             {
                 state.squares[target.file, target.rank].piece = null;
             }
+
+            if (isTyrant && target.type != PieceType.Pawn)
+            {
+                TrySummonExecutionPawn(state, actorColor, summonFile, summonRank);
+                manager.BoardManager.RefreshPieceVisuals();
+            }
+
+            return true;
+        }
+
+        private void TrySummonExecutionPawn(BoardState state, PieceColor color, int file, int rank)
+        {
+            if (TryPlaceExecutionPawn(state, color, file, rank))
+            {
+                return;
+            }
+
+            for (int radius = 1; radius <= 7; radius++)
+            {
+                for (int candidateFile = file - radius; candidateFile <= file + radius; candidateFile++)
+                {
+                    for (int candidateRank = rank - radius; candidateRank <= rank + radius; candidateRank++)
+                    {
+                        if (TryPlaceExecutionPawn(state, color, candidateFile, candidateRank))
+                        {
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        private bool TryPlaceExecutionPawn(BoardState state, PieceColor color, int file, int rank)
+        {
+            if (!state.IsInBounds(file, rank) || state.GetPiece(file, rank) != null)
+            {
+                return false;
+            }
+
+            Pawn pawn = new Pawn(color, file, rank);
+            pawn.pieceName = color == PieceColor.White ? "White Execution Pawn" : "Black Execution Pawn";
+            pawn.support = 50;
+            pawn.taxPerTurn = 0;
+            state.squares[file, rank].piece = pawn;
             return true;
         }
     }

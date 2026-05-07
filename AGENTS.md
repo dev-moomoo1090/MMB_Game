@@ -85,9 +85,13 @@
 | CommandActionButtonVisualFeedback | CommandActionButton, BoxCollider2D, Transform | 직접 호출 / 시각 피드백 |
 | CommandActionInputPrompt | CommandActionButton, TextMesh, SpriteRenderer, Keyboard | 정적 호출 / 입력값 처리 |
 | CommandActionInputRequirements | (없음) | 정적 데이터 |
+| RegimeActionButtons | TurnManager, PoliticalManager, KingStateEvaluator, ActionResultPanel, EventBus, TextMesh, SpriteRenderer, BoxCollider2D | 런타임 생성 / 정치형태 특수 버튼 처리 |
 | CommandActionTooltip | CommandActionButton, CommandActionTooltipDescriptions, SpriteRenderer, TextMesh, BoxCollider2D | 정적 호출 / 호버 설명 표시 |
 | CommandActionTooltipDescriptions | (없음) | 정적 데이터 |
-| TurnStatusDisplay | TurnManager, EventBus, TextMesh, SpriteRenderer | 이벤트 구독 / 턴 표시 |
+| ActionResultPanel | TextMesh, SpriteRenderer, BoxCollider2D, Mouse | 정적 호출 / 행동 결과 표시 |
+| ActionResultText | ActionResultContext | 정적 호출 / 행동별 결과 문구 제공 |
+| TextMeshFontApplier | TextMesh, Font, MeshRenderer | 정적 호출 / 공통 폰트 적용 |
+| TurnStatusDisplay | TurnManager, BoardManager, PoliticsManager, KingStateEvaluator, EventBus, TextMesh, SpriteRenderer, BoxCollider2D | 이벤트 구독 / 턴/왕 상태 표시 |
 | BoardCoordinateMapper | Transform, SpriteRenderer | 정적 호출 |
 | BuildChessBoard | BoardCoordinateMapper | 정적 호출 |
 | BoardState | Square, ChessPiece, Move, 도로 상태 | 직접 보관 |
@@ -97,23 +101,24 @@
 | MoveValidator | MoveGenerator, CheckDetector, SpecialMoves | 정적 호출 |
 | MoveGenerator | BoardState, ChessPiece (서브클래스) | 직접 읽기 |
 | SpecialMoves | BoardState, ChessPiece 서브클래스 생성 | 직접 변경 |
-| ObedienceSystem | ChessPiece | 정적 호출 |
+| ObedienceSystem | ChessPiece, KingStateEvaluator | 정적 호출 |
 | CheckDetector | BoardState | 직접 읽기 |
 | BoardEvaluator | BoardState | 직접 읽기 |
 | StalemateDetector | CheckDetector, MoveValidator | 정적 호출 |
 | DrawDetector | BoardState | 직접 읽기 |
-| GameManager | BoardManager, TurnManager, PoliticsManager, MilitaryManager, PoliticalManager, RebellionSystem, KingStateEffectApplier, AutonomousMovement | SerializeField |
+| GameManager | BoardManager, TurnManager, PoliticsManager, MilitaryManager, PoliticalManager, RebellionSystem, KingStateEffectApplier, HonorPiecePassiveSystem, RegimeActionButtons, AutonomousMovement | SerializeField |
 | RebellionSystem | BoardManager, BoardState, EventBus | 직접 호출 |
-| KingStateEffectApplier | BoardManager, PoliticsManager, KingStateEvaluator, BoardEvaluator, EventBus | 직접 호출 |
+| KingStateEffectApplier | BoardManager, PoliticsManager, TurnManager, KingStateEvaluator, ChessPiece, EventBus | 직접 호출 |
+| HonorPiecePassiveSystem | BoardManager, PoliticsManager, PlayerState, ChessPiece, MoveValidator, BoardEvaluator, ObedienceSystem, EventBus | 직접 호출 / 명예 패시브 |
 | AutonomousMovement | BoardManager, MoveValidator, CheckDetector, BoardEvaluator, SpecialMoves, EventBus | 직접 호출 |
 | TurnManager | EventBus | 직접 호출 |
 | EventBus | (없음) | 싱글턴 |
-| PoliticsManager | PlayerState, FiscalAction 서브클래스, BoardManager, EventBus | 직접 호출 |
+| PoliticsManager | PlayerState, FiscalAction 서브클래스, BoardManager, KingStateEvaluator, ActionResultPanel 표시 데이터, EventBus | 직접 호출 |
 | FiscalAction (서브클래스) | ChessPiece, PlayerState, PoliticsManager, BoardManager | 직접 변경 |
-| MilitaryManager | BoardManager, MilitaryAction 서브클래스, EventBus | 직접 호출 |
+| MilitaryManager | BoardManager, MilitaryAction 서브클래스, KingStateEvaluator, EventBus | 직접 호출 |
 | MilitaryAction (서브클래스) | ChessPiece, MilitaryManager, BoardState, CheckDetector, MovePattern | 직접 변경 |
 | PoliticalManager | BoardManager, PoliticsManager, PoliticalAction 서브클래스, EventBus | 직접 호출 |
-| PoliticalAction (서브클래스) | ChessPiece, PoliticalManager, PlayerState, BoardState, MoveGenerator, SpecialMoves, EventBus | 직접 변경 |
+| PoliticalAction (서브클래스) | ChessPiece, PoliticalManager, PlayerState, BoardState, MoveGenerator, SpecialMoves, KingStateEvaluator, EventBus | 직접 변경 |
 | KingStateEvaluator | PlayerState, BoardState, ChessPiece | 정적 호출 |
 
 ---
@@ -219,3 +224,37 @@
 - **커맨드 힌트 박스 추가**: 버튼 호버 시 큰 투명 회색 배경과 흰색 글씨로 조건/비용/기능 설명 표시, 박스 영역까지 호버 유지 및 긴 설명 휠 스크롤 지원, 호버 종료 또는 클릭 시 자동 숨김
 - **턴 상태 표시 추가**: 왼쪽 하단에 현재 색상/페이즈를 `백 정치 턴`, `백 체스 턴`, `흑 정치 턴` 형식으로 표시하고 TurnManager 이벤트에 따라 갱신
 - **실제 플레이 흐름 보강**: 정치 페이즈 보드 행마 차단, 행동 성공 후 선택 기물 프로필 갱신, 입력값 필요 행동은 우측 하단 입력창에서 값 입력 후 적용되도록 연결
+
+### 왕 상태 효과 사양 반영 (2026-05-07)
+- **성군 효과**: 정치 턴 시작 시 명예/50 기반 지지도 상승, 이후 전체 지지도 기반 명예 상승, 아군 사망 시 기물 가치만큼 지지도/명예 감소, 배신 확률 보정
+- **독재 효과**: 아군 기물 명령 거부 확률 0%, 군사 행동 비용 -50%, 세금 수입 +50%, 포로 처형 시 지지도 보너스, 명예 감소 시 지지도 감소
+- **암군 효과**: 최초 진입 시 세금 -30%/수락 -30/지지도 -10, 매 턴 세금 +5%/수락 +5/지지도 +1, 20턴 생존 시 성군 고정 및 세금 +200%/수락 +100/지지도 +5
+- **폭군 효과**: 기물 세금 수입 +400%, 처형 행동 턴 소모 없음, 비폰 처형 시 특수 폰 소환, 처형 페널티 -80%, 반란/배신 확률 +30%
+- **왕 상태 UI**: 턴 상태 표시 위에 현재 왕 상태 아이콘을 표시하고, 호버 시 적용 중인 버프/디버프 설명 툴팁 표시
+
+### 재정 행동 결과 UI 반영 (2026-05-07)
+- **결과 패널**: ActionResultPanel 추가, 중앙 팝업으로 행동 결과와 확인 버튼 표시, 배경 크기 2배 확대
+- **결과 문구 파일**: ActionResultText 추가, 재정/군사/정치 행동별 결과 문구를 한 파일에서 수정 가능하도록 분리
+- **재정 결과 요약**: PoliticsManager가 재정 행동 실행 전후 골드/턴수입/기물 지지도/세금 상태 차이를 문장으로 생성
+- **턴 진행 보류**: 재정/군사/정치 행동 성공 시 결과 패널 확인 후 다음 페이즈로 진행
+- **특세/감면 보정**: 특세는 세금 2배 및 지지도 -5, 감면은 세금 면제 및 지지도 +5로 조정
+
+### 명예 기물별 행동 기반 구현 (2026-05-07)
+- **명예 패시브 시스템**: HonorPiecePassiveSystem 추가, 명예 20 이상 패시브와 추후 불명예 -20 이하 패시브 확장 구조 분리
+- **폰 물자 지원**: 턴 시작 시 명예 기반 확률로 군사 카테고리 행동 1회 비용 면제권 예약 구조 추가
+- **나이트 패시브**: 킹사이드 나이트가 있으면 명령 거부 시 명예 기반 확률로 수락 재시도, 퀸사이드 나이트는 턴 시작 시 명예/지지도 칭송 이벤트 처리
+- **비숍 패시브**: 킹사이드 비숍의 장부조작 세금 수입 20% 감소, 병법 추천 수 알림 처리
+- **룩 패시브**: 퀸사이드 룩의 무역 제시 턴 수입 +30 1회 처리, 군자금 요청 자동 처리
+- **기물 사이드 보정**: ChessPiece 생성 시 PieceSideResolver에 file이 아닌 rank를 넘기도록 수정
+
+### 정치형태 특수 행동 구현 (2026-05-07)
+- **정치행동 스킵**: 성군 상태에서 현재 정치행동을 스킵하면 다음 자기 정치 턴 행동 횟수가 1회 증가하며 최대 2회까지만 적용
+- **쇄국**: 독재 상태에서 게임당 1회 사용 가능, 사용 후 3턴 동안 양 플레이어의 상대 영향 정치행동(매수/제후국/선동/여론조작/배신/암살) 차단
+- **특수 버튼 UI**: RegimeActionButtons 추가, 입력값 입력창 위에 작은 스킵/쇄국 버튼을 런타임 생성하고 조건 미충족/성공 결과를 ActionResultPanel로 표시
+
+### 공통 폰트 적용 (2026-05-07)
+- **Tangba14 폰트 통일**: 씬에 배치된 TextMesh와 런타임 생성 TextMesh가 Assets/Tangba14.ttf를 사용하도록 TextMeshFontApplier 추가 및 UI 생성 경로 연결
+
+### 커맨드/프로필 가독성 보강 (2026-05-07)
+- **커맨드 버튼 재배치**: 재정/군사 페이지 버튼은 2열, 정치 페이지 버튼은 3열 그리드로 재배치하고 버튼 글자 크기 조정
+- **프로필 텍스트 보정**: 프로필 TextMesh 색상을 흰색으로 통일하고 Position 박스 크기를 넘으면 characterSize가 자동 축소되도록 적용

@@ -31,16 +31,16 @@ namespace MMBGame
         {
             file = -1;
             rank = -1;
-            if (string.IsNullOrEmpty(tileName) || !tileName.StartsWith("Tile_"))
+            if (string.IsNullOrEmpty(tileName))
             {
                 return false;
             }
 
-            string[] parts = tileName.Split('_');
-            if (parts.Length == 2 && parts[1].Length == 2)
+            // "a1" format (현재 타일 이름 형식)
+            if (tileName.Length == 2)
             {
-                int parsedFile = parts[1][0] - 'a';
-                int parsedRank = parts[1][1] - '1';
+                int parsedFile = tileName[0] - 'a';
+                int parsedRank = tileName[1] - '1';
                 if (parsedFile >= 0 && parsedFile <= 7 && parsedRank >= 0 && parsedRank <= 7)
                 {
                     file = parsedFile;
@@ -48,13 +48,30 @@ namespace MMBGame
                     return true;
                 }
             }
-            // 테스트 커밋
-            if (parts.Length == 3 && int.TryParse(parts[1], out int displayFile) && int.TryParse(parts[2], out int displayRank))
+
+            // "Tile_a1" format (이전 형식 호환)
+            if (tileName.StartsWith("Tile_"))
             {
-                Vector2Int logicalSquare = ToLogicalSquare(displayFile, displayRank);
-                file = logicalSquare.x;
-                rank = logicalSquare.y;
-                return true;
+                string[] parts = tileName.Split('_');
+                if (parts.Length == 2 && parts[1].Length == 2)
+                {
+                    int parsedFile = parts[1][0] - 'a';
+                    int parsedRank = parts[1][1] - '1';
+                    if (parsedFile >= 0 && parsedFile <= 7 && parsedRank >= 0 && parsedRank <= 7)
+                    {
+                        file = parsedFile;
+                        rank = parsedRank;
+                        return true;
+                    }
+                }
+
+                if (parts.Length == 3 && int.TryParse(parts[1], out int displayFile) && int.TryParse(parts[2], out int displayRank))
+                {
+                    Vector2Int logicalSquare = ToLogicalSquare(displayFile, displayRank);
+                    file = logicalSquare.x;
+                    rank = logicalSquare.y;
+                    return true;
+                }
             }
 
             return false;

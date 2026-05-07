@@ -58,30 +58,6 @@ namespace MMBGame
             UpdatePointerState();
         }
 
-        private void OnMouseEnter()
-        {
-            isHovered = true;
-            visualFeedback.SetHovered(true);
-            CommandActionTooltip.Show(actionName, transform);
-        }
-
-        private void OnMouseExit()
-        {
-            isHovered = false;
-            visualFeedback.SetHovered(false);
-        }
-
-        private void OnMouseDown()
-        {
-            SetPressed(true);
-            CommandActionTooltip.Hide();
-            HandleClick();
-        }
-
-        private void OnMouseUp()
-        {
-            SetPressed(false);
-        }
 
         private void OnDisable()
         {
@@ -96,11 +72,27 @@ namespace MMBGame
 
         public bool Execute()
         {
+            if (!CanExecuteInCurrentPhase())
+            {
+                return false;
+            }
+
             return ExecuteWithValue(ResolveInputValue(ResolveSelectedPiece()));
         }
 
         private void HandleClick()
         {
+            if (!CanExecuteInCurrentPhase())
+            {
+                return;
+            }
+
+            if (actionName == "FrontDeployAction")
+            {
+                ShowFrontDeployPanel();
+                return;
+            }
+
             if (CommandActionInputRequirements.RequiresValue(actionName))
             {
                 CommandActionInputPrompt.Show(actionName, value => ExecuteWithValue(value));
@@ -110,8 +102,50 @@ namespace MMBGame
             Execute();
         }
 
+        private bool CanExecuteInCurrentPhase()
+        {
+            if (turnManager == null)
+            {
+                turnManager = FindFirstObjectByType<TurnManager>();
+            }
+
+            return turnManager == null || turnManager.CurrentPhase == GamePhase.PoliticsPhase;
+        }
+
+        private void ShowFrontDeployPanel()
+        {
+            if (politicsManager == null)
+            {
+                return;
+            }
+
+            BoardManager boardManager = politicsManager.BoardManager;
+            if (boardManager?.BoardState == null)
+            {
+                return;
+            }
+
+            BoardPieceSetupManager setupManager = FindFirstObjectByType<BoardPieceSetupManager>();
+            PieceColor color = ResolveActorColor();
+
+            FrontDeployPanel.Show(color, boardManager.BoardState, setupManager, piece =>
+            {
+                bool result = politicsManager.ExecuteFiscalAction("FrontDeployAction", piece, 0);
+                RefreshProfileIfNeeded(result);
+                if (result)
+                {
+                    ShowFiscalResultThenAdvance();
+                }
+            });
+        }
+
         private bool ExecuteWithValue(int value)
         {
+            if (!CanExecuteInCurrentPhase())
+            {
+                return false;
+            }
+
             if (string.IsNullOrEmpty(actionName))
             {
                 return false;
@@ -119,25 +153,85 @@ namespace MMBGame
 
             ChessPiece target = ResolveSelectedPiece();
             PieceColor color = ResolveActorColor();
+            int resolvedFile = targetFile >= 0 ? targetFile : ResolveTargetFile();
+            int resolvedRank = targetRank >= 0 ? targetRank : ResolveTargetRank();
             bool result;
 
             if (category == CommandActionCategory.Fiscal)
             {
                 result = politicsManager != null && politicsManager.ExecuteFiscalAction(actionName, target, value);
-                RefreshProfileIfNeeded(result);
-                return result;
             }
-
-            if (category == CommandActionCategory.Military)
+            else if (category == CommandActionCategory.Military)
             {
-                result = militaryManager != null && militaryManager.ExecuteMilitaryAction(actionName, target, targetFile, targetRank, color);
-                RefreshProfileIfNeeded(result);
-                return result;
+                result = militaryManager != null && militaryManager.ExecuteMilitaryAction(actionName, target, resolvedFile, resolvedRank, color);
+            }
+            else
+            {
+                result = politicalManager != null && politicalManager.ExecutePoliticalAction(actionName, target, color, value);
             }
 
-            result = politicalManager != null && politicalManager.ExecutePoliticalAction(actionName, target, color, value);
+            if (!result && category == CommandActionCategory.Political && politicalManager != null && !string.IsNullOrEmpty(politicalManager.LastFailureReason))
+            {
+                ActionResultPanel.Show("?됰룞 寃곌낵", politicalManager.LastFailureReason, null);
+            }
+
             RefreshProfileIfNeeded(result);
+            if (result && category == CommandActionCategory.Fiscal)
+            {
+                ShowFiscalResultThenAdvance();
+            }
+            else if (result)
+            {
+                ShowActionResultThenContinue(target, value, resolvedFile, resolvedRank, color);
+            }
+
             return result;
+        }
+
+        private void ShowFiscalResultThenAdvance()
+        {
+            string resultText = politicsManager != null && !string.IsNullOrEmpty(politicsManager.LastFiscalActionResultText)
+                ? politicsManager.LastFiscalActionResultText
+                : "재정 행동이 실행되었습니다.";
+            ActionResultPanel.Show("재정 행동 결과", resultText, AdvanceTurn);
+        }
+
+        private void ShowActionResultThenContinue(ChessPiece target, int value, int file, int rank, PieceColor color)
+        {
+            ActionResultContext context = new ActionResultContext
+            {
+                actionName = actionName,
+                targetName = target != null ? GetPieceShortName(target) : "대상",
+                inputValue = value,
+                supportDelta = 0,
+                goldDelta = 0,
+                goldPerTurnDelta = 0,
+                taxModifierBefore = target != null ? target.taxModifier : 1,
+                taxModifierAfter = target != null ? target.taxModifier : 1,
+                targetFile = file,
+                targetRank = rank
+            };
+
+            string resultText = ActionResultText.Resolve(actionName, context);
+            System.Action confirmAction = IsFreeAction(color) ? null : AdvanceTurn;
+            ActionResultPanel.Show("행동 결과", resultText, confirmAction);
+        }
+
+        private bool IsFreeAction(PieceColor color)
+        {
+            return category == CommandActionCategory.Political &&
+                actionName == "처형" &&
+                KingStateEvaluator.IsTyrant(color);
+        }
+
+        private void AdvanceTurn()
+        {
+            if (turnManager == null)
+            {
+                turnManager = FindFirstObjectByType<TurnManager>();
+            }
+
+            turnManager?.EndPhase();
         }
 
         private ChessPiece ResolveSelectedPiece()
@@ -170,6 +264,26 @@ namespace MMBGame
             return actorColor;
         }
 
+        private int ResolveTargetFile()
+        {
+            if (boardInteraction == null)
+                boardInteraction = FindFirstObjectByType<BoardInteraction>();
+            if (boardInteraction != null && boardInteraction.SelectedTargetFile >= 0)
+                return boardInteraction.SelectedTargetFile;
+            ChessPiece piece = ResolveSelectedPiece();
+            return piece != null ? piece.file : -1;
+        }
+
+        private int ResolveTargetRank()
+        {
+            if (boardInteraction == null)
+                boardInteraction = FindFirstObjectByType<BoardInteraction>();
+            if (boardInteraction != null && boardInteraction.SelectedTargetRank >= 0)
+                return boardInteraction.SelectedTargetRank;
+            ChessPiece piece = ResolveSelectedPiece();
+            return piece != null ? piece.rank : -1;
+        }
+
         private int ResolveInputValue(ChessPiece target)
         {
             if (inputValue > 0)
@@ -187,6 +301,11 @@ namespace MMBGame
 
         private void UpdatePointerState()
         {
+            if (ActionResultPanel.IsOpen)
+            {
+                return;
+            }
+
             if (visualFeedback == null || visualFeedback.Collider == null || Camera.main == null)
             {
                 return;
@@ -216,6 +335,7 @@ namespace MMBGame
             {
                 SetPressed(true);
                 CommandActionTooltip.Hide();
+                HandleClick();
             }
 
             if (isPressed && !mouse.leftButton.isPressed)
@@ -251,6 +371,52 @@ namespace MMBGame
             }
 
             boardInteraction?.RefreshSelectionProfile();
+        }
+
+        private string GetPieceShortName(ChessPiece piece)
+        {
+            if (piece == null)
+            {
+                return "기물";
+            }
+
+            return GetColorName(piece.color) + GetSideName(piece.side) + GetTypeName(piece.type);
+        }
+
+        private string GetColorName(PieceColor color)
+        {
+            return color == PieceColor.Black ? "흑" : "백";
+        }
+
+        private string GetSideName(PieceSide side)
+        {
+            if (side == PieceSide.Kingside)
+            {
+                return "K";
+            }
+
+            if (side == PieceSide.Queenside)
+            {
+                return "Q";
+            }
+
+            return string.Empty;
+        }
+
+        private string GetTypeName(PieceType type)
+        {
+            switch (type)
+            {
+                case PieceType.Pawn: return "폰";
+                case PieceType.Rook: return "룩";
+                case PieceType.Knight: return "나이트";
+                case PieceType.Bishop: return "비숍";
+                case PieceType.Queen: return "퀸";
+                case PieceType.King: return "킹";
+                case PieceType.Barricade: return "바리케이드";
+                case PieceType.Trebuchet: return "트레뷰셋";
+                default: return type.ToString();
+            }
         }
     }
 }

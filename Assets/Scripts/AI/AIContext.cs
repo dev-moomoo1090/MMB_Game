@@ -41,13 +41,10 @@ namespace MMBGame.AI
             => KingStateEvaluator.Evaluate(GetPlayerState(color), BoardState);
 
         public bool IsBenevolent(PieceColor color)
-            => GetKingState(color) == KingState.Sage;
+            => KingStateEvaluator.IsBenevolent(color) || GetKingState(color) == KingState.Sage;
 
         public bool IsDictatorship(PieceColor color)
-        {
-            var ks = GetKingState(color);
-            return ks == KingState.Autocrat || ks == KingState.Tyrant;
-        }
+            => KingStateEvaluator.IsDictatorship(color) || GetKingState(color) == KingState.Autocrat;
 
         public PieceColor Opponent(PieceColor color)
             => color == PieceColor.White ? PieceColor.Black : PieceColor.White;

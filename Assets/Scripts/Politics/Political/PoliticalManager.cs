@@ -8,10 +8,14 @@ namespace MMBGame
         private readonly List<PoliticalAction> politicalActions = new List<PoliticalAction>();
         private readonly Dictionary<PieceColor, string> lastActions = new Dictionary<PieceColor, string>();
         private readonly Dictionary<PieceColor, List<string>> recentActions = new Dictionary<PieceColor, List<string>>();
+        private readonly HashSet<PieceColor> isolationUsedColors = new HashSet<PieceColor>();
         private BoardManager boardManager;
         private PoliticsManager politicsManager;
+        private int isolationPoliticsPhasesRemaining;
 
         public BoardManager BoardManager => boardManager;
+        public int IsolationPoliticsPhasesRemaining => isolationPoliticsPhasesRemaining;
+        public string LastFailureReason { get; private set; }
 
         public void Initialize()
         {
@@ -19,6 +23,9 @@ namespace MMBGame
             politicsManager = FindObjectOfType<PoliticsManager>();
             lastActions.Clear();
             recentActions.Clear();
+            isolationUsedColors.Clear();
+            isolationPoliticsPhasesRemaining = 0;
+            LastFailureReason = null;
             politicalActions.Clear();
             politicalActions.Add(new ReconAction());
             politicalActions.Add(new FeudalStateAction());
@@ -85,6 +92,7 @@ namespace MMBGame
 
         public bool ExecutePoliticalAction(string actionName, ChessPiece target, PieceColor actorColor, int value = 0)
         {
+            LastFailureReason = null;
             PoliticalAction action = null;
             for (int i = 0; i < politicalActions.Count; i++)
             {
@@ -97,6 +105,12 @@ namespace MMBGame
 
             if (action == null)
             {
+                return false;
+            }
+
+            if (IsIsolationBlocking(actionName))
+            {
+                LastFailureReason = "쇄국 중에는 상대에게 영향을 주는 정치행동을 사용할 수 없습니다.";
                 return false;
             }
 
@@ -119,6 +133,29 @@ namespace MMBGame
             return result;
         }
 
+        public bool CanExecuteIsolation(PieceColor actorColor)
+        {
+            return actorColor != PieceColor.None &&
+                KingStateEvaluator.IsDictatorship(actorColor) &&
+                !isolationUsedColors.Contains(actorColor) &&
+                isolationPoliticsPhasesRemaining <= 0;
+        }
+
+        public bool ExecuteIsolation(PieceColor actorColor)
+        {
+            LastFailureReason = null;
+            if (!CanExecuteIsolation(actorColor))
+            {
+                LastFailureReason = "쇄국은 독재 상태에서 게임당 한 번만 사용할 수 있습니다.";
+                return false;
+            }
+
+            isolationUsedColors.Add(actorColor);
+            isolationPoliticsPhasesRemaining = 7;
+            EventBus.Instance.PublishActionExecuted(actorColor, "쇄국");
+            return true;
+        }
+
         private void HandleActionExecuted(PieceColor color, string actionName)
         {
             lastActions[color] = actionName;
@@ -137,7 +174,37 @@ namespace MMBGame
 
         private void HandleTurnChanged(PieceColor color)
         {
+            if (isolationPoliticsPhasesRemaining > 0)
+            {
+                isolationPoliticsPhasesRemaining--;
+            }
+
             ClearIntelTargets();
+        }
+
+        private bool IsIsolationBlocking(string actionName)
+        {
+            return isolationPoliticsPhasesRemaining > 0 && IsOpponentAffectingPoliticalAction(actionName);
+        }
+
+        private bool IsOpponentAffectingPoliticalAction(string actionName)
+        {
+            switch (actionName)
+            {
+                case "매수":
+                case "제후국":
+                case "선동":
+                case "여론조작":
+                case "배신 - 접촉":
+                case "배신 - 정보":
+                case "배신 - 실책":
+                case "배신 - 파벌":
+                case "배신 - 암살":
+                case "암살":
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         private void ClearIntelTargets()

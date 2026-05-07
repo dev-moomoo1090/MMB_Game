@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using MMBGame;
 
 /// <summary>
 /// 커맨드 북 - 페이지 3개(재정/정치/군사)를 클릭 방향에 따라 넘겨줌.
@@ -36,6 +37,7 @@ public class CommandBook : MonoBehaviour
 
         RaycastHit2D hit = Physics2D.GetRayIntersection(Camera.main.ScreenPointToRay(screenPos));
         if (hit.collider != null && hit.collider.GetComponent("CommandActionButton") != null) return;
+        if (hit.collider != null && hit.collider.GetComponent<RegimeActionButtonHitbox>() != null) return;
 
         if (!sr.bounds.Contains(worldClick)) return;
 

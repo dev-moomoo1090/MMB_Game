@@ -13,6 +13,8 @@ namespace MMBGame
         [SerializeField] private PoliticalManager politicalManager;
         [SerializeField] private RebellionSystem rebellionSystem;
         [SerializeField] private KingStateEffectApplier kingStateEffectApplier;
+        [SerializeField] private HonorPiecePassiveSystem honorPiecePassiveSystem;
+        [SerializeField] private RegimeActionButtons regimeActionButtons;
         [SerializeField] private AutonomousMovement autonomousMovement;
         [SerializeField] private StockfishBridge stockfishBridge;
         public BoardManager BoardManager => boardManager;
@@ -22,6 +24,8 @@ namespace MMBGame
         public PoliticalManager PoliticalManager => politicalManager;
         public RebellionSystem RebellionSystem => rebellionSystem;
         public KingStateEffectApplier KingStateEffectApplier => kingStateEffectApplier;
+        public HonorPiecePassiveSystem HonorPiecePassiveSystem => honorPiecePassiveSystem;
+        public RegimeActionButtons RegimeActionButtons => regimeActionButtons;
         public AutonomousMovement AutonomousMovement => autonomousMovement;
         public StockfishBridge StockfishBridge => stockfishBridge;
 
@@ -68,6 +72,26 @@ namespace MMBGame
                 kingStateEffectApplier = FindObjectOfType<KingStateEffectApplier>();
             }
 
+            if (honorPiecePassiveSystem == null)
+            {
+                honorPiecePassiveSystem = FindObjectOfType<HonorPiecePassiveSystem>();
+            }
+
+            if (honorPiecePassiveSystem == null)
+            {
+                honorPiecePassiveSystem = gameObject.AddComponent<HonorPiecePassiveSystem>();
+            }
+
+            if (regimeActionButtons == null)
+            {
+                regimeActionButtons = FindFirstObjectByType<RegimeActionButtons>();
+            }
+
+            if (regimeActionButtons == null)
+            {
+                regimeActionButtons = gameObject.AddComponent<RegimeActionButtons>();
+            }
+
             if (autonomousMovement == null)
             {
                 autonomousMovement = FindObjectOfType<AutonomousMovement>();
@@ -88,6 +112,11 @@ namespace MMBGame
                 kingStateEffectApplier.Initialize();
             }
 
+            if (honorPiecePassiveSystem != null)
+            {
+                honorPiecePassiveSystem.Initialize();
+            }
+
             if (militaryManager != null)
             {
                 militaryManager.Initialize();
@@ -96,6 +125,11 @@ namespace MMBGame
             if (politicalManager != null)
             {
                 politicalManager.Initialize();
+            }
+
+            if (regimeActionButtons != null)
+            {
+                regimeActionButtons.Initialize();
             }
 
             if (rebellionSystem != null)

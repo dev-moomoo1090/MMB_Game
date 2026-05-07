@@ -6,18 +6,39 @@ namespace MMBGame
 {
     public class KingStateEffectApplier : MonoBehaviour
     {
-        private readonly Dictionary<PieceColor, int> darkKingTurnCounts = new Dictionary<PieceColor, int>();
+        private const int INCOMPETENT_SURVIVAL_TURNS = 20;
+        private const float INCOMPETENT_INITIAL_TAX_RATE = 0.7f;
+        private const int INCOMPETENT_INITIAL_ACCEPTANCE_PENALTY = 30;
+        private const int INCOMPETENT_INITIAL_SUPPORT_PENALTY = 10;
+        private const float INCOMPETENT_TURN_TAX_RATE = 1.05f;
+        private const int INCOMPETENT_TURN_ACCEPTANCE_GAIN = 5;
+        private const int INCOMPETENT_TURN_SUPPORT_GAIN = 1;
+        private const float INCOMPETENT_FIXED_TAX_RATE = 3f;
+        private const int INCOMPETENT_FIXED_ACCEPTANCE_GAIN = 100;
+        private const int INCOMPETENT_FIXED_SUPPORT_GAIN = 5;
+
+        private static KingStateEffectApplier instance;
+
+        private readonly Dictionary<PieceColor, int> incompetentTurnCounts = new Dictionary<PieceColor, int>();
+        private readonly HashSet<PieceColor> incompetentPenaltyAppliedColors = new HashSet<PieceColor>();
         private readonly Dictionary<PieceColor, Action<int>> honorChangeHandlers = new Dictionary<PieceColor, Action<int>>();
+        private readonly HashSet<PieceColor> suppressNextHonorDecreasePenaltyColors = new HashSet<PieceColor>();
 
         private BoardManager boardManager;
         private PoliticsManager politicsManager;
 
+        public static KingStateEffectApplier Instance => instance;
+
         public void Initialize()
         {
+            instance = this;
             boardManager = FindObjectOfType<BoardManager>();
             politicsManager = FindObjectOfType<PoliticsManager>();
-            darkKingTurnCounts[PieceColor.White] = 0;
-            darkKingTurnCounts[PieceColor.Black] = 0;
+            incompetentTurnCounts[PieceColor.White] = 0;
+            incompetentTurnCounts[PieceColor.Black] = 0;
+            incompetentPenaltyAppliedColors.Clear();
+            suppressNextHonorDecreasePenaltyColors.Clear();
+            KingStateEvaluator.ResetRuntimeState();
 
             EventBus.Instance.OnPhaseChanged -= HandlePhaseChanged;
             EventBus.Instance.OnPhaseChanged += HandlePhaseChanged;
@@ -31,6 +52,15 @@ namespace MMBGame
             EventBus.Instance.OnPieceCapturePending -= HandlePieceCapture;
             RemoveHonorChangeHandler(PieceColor.White);
             RemoveHonorChangeHandler(PieceColor.Black);
+            if (instance == this)
+            {
+                instance = null;
+            }
+        }
+
+        public void SuppressNextHonorDecreasePenalty(PieceColor color)
+        {
+            suppressNextHonorDecreasePenaltyColors.Add(color);
         }
 
         private void HandlePhaseChanged(GamePhase phase)
@@ -40,16 +70,7 @@ namespace MMBGame
                 return;
             }
 
-            if (boardManager == null)
-            {
-                boardManager = FindObjectOfType<BoardManager>();
-            }
-
-            if (politicsManager == null)
-            {
-                politicsManager = FindObjectOfType<PoliticsManager>();
-            }
-
+            EnsureReferences();
             if (boardManager == null || boardManager.BoardState == null || politicsManager == null)
             {
                 return;
@@ -63,6 +84,7 @@ namespace MMBGame
             }
 
             KingState state = KingStateEvaluator.Evaluate(player, boardManager.BoardState);
+            KingStateEvaluator.SetCurrentState(color, state);
             ApplyKingStateEffect(state, player, color);
         }
 
@@ -72,47 +94,99 @@ namespace MMBGame
 
             if (state == KingState.Sage)
             {
-                darkKingTurnCounts[color] = 0;
+                incompetentTurnCounts[color] = 0;
                 RemoveHonorChangeHandler(color);
-                int bonus = Mathf.FloorToInt(player.honor / 50f);
-                if (bonus > 0)
-                {
-                    ApplyToAllPieces(board, color, piece => piece.support += bonus);
-                }
-
+                ApplyBenevolentEffect(board, player, color);
                 return;
             }
 
             if (state == KingState.DarkKing)
             {
                 RemoveHonorChangeHandler(color);
-                darkKingTurnCounts[color]++;
-                player.AddHonor(1);
-                ApplyToAllPieces(board, color, piece => piece.support += 1);
-
-                if (darkKingTurnCounts[color] >= 20 && player.honor < 20)
-                {
-                    player.AddHonor(20 - player.honor);
-                    darkKingTurnCounts[color] = 0;
-                }
-
+                ApplyIncompetentEffect(board, color);
                 return;
             }
 
-            darkKingTurnCounts[color] = 0;
+            incompetentTurnCounts[color] = 0;
 
             if (state == KingState.Autocrat)
             {
-                player.AddGold(player.goldPerTurn / 2);
                 EnsureHonorChangeHandler(player, color);
                 return;
             }
 
             RemoveHonorChangeHandler(color);
-            if (state == KingState.Tyrant)
+        }
+
+        private void ApplyBenevolentEffect(BoardState board, PlayerState player, PieceColor color)
+        {
+            if (KingStateEvaluator.IsFixedBenevolent(color))
             {
-                ApplyToAllPieces(board, color, piece => piece.rebellionWeight += 0.3f);
+                ApplyToAllPieces(board, color, piece => piece.support += INCOMPETENT_FIXED_SUPPORT_GAIN);
+                return;
             }
+
+            int supportGain = Mathf.CeilToInt(player.honor / 50f);
+            if (supportGain > 0)
+            {
+                ApplyToAllPieces(board, color, piece => piece.support += supportGain);
+            }
+
+            int highSupportCount = CountPieces(board, color, piece => piece.support >= 51);
+            int totalPieces = CountPieces(board, color, piece => true);
+            if (highSupportCount <= 0 || totalPieces <= 0)
+            {
+                return;
+            }
+
+            int totalSupportScore = KingStateEvaluator.ComputeTotalSupport(color, board);
+            int honorGain = Mathf.FloorToInt((float)totalSupportScore / highSupportCount * totalPieces);
+            if (honorGain > 0)
+            {
+                player.AddHonor(honorGain);
+            }
+        }
+
+        private void ApplyIncompetentEffect(BoardState board, PieceColor color)
+        {
+            if (!incompetentPenaltyAppliedColors.Contains(color))
+            {
+                ApplyToAllPieces(board, color, ApplyIncompetentInitialPenalty);
+                incompetentPenaltyAppliedColors.Add(color);
+            }
+
+            ApplyToAllPieces(board, color, ApplyIncompetentTurnGrowth);
+            incompetentTurnCounts[color]++;
+            if (incompetentTurnCounts[color] < INCOMPETENT_SURVIVAL_TURNS)
+            {
+                return;
+            }
+
+            ApplyToAllPieces(board, color, ApplyIncompetentFixedBonus);
+            KingStateEvaluator.FixBenevolent(color);
+            KingStateEvaluator.SetCurrentState(color, KingState.Sage);
+            incompetentTurnCounts[color] = 0;
+        }
+
+        private void ApplyIncompetentInitialPenalty(ChessPiece piece)
+        {
+            piece.taxPerTurn = Mathf.Max(1, Mathf.FloorToInt(piece.taxPerTurn * INCOMPETENT_INITIAL_TAX_RATE));
+            piece.acceptWeight -= INCOMPETENT_INITIAL_ACCEPTANCE_PENALTY;
+            piece.support -= INCOMPETENT_INITIAL_SUPPORT_PENALTY;
+        }
+
+        private void ApplyIncompetentTurnGrowth(ChessPiece piece)
+        {
+            piece.taxPerTurn = Mathf.Max(piece.taxPerTurn, Mathf.CeilToInt(piece.taxPerTurn * INCOMPETENT_TURN_TAX_RATE));
+            piece.acceptWeight += INCOMPETENT_TURN_ACCEPTANCE_GAIN;
+            piece.support += INCOMPETENT_TURN_SUPPORT_GAIN;
+        }
+
+        private void ApplyIncompetentFixedBonus(ChessPiece piece)
+        {
+            piece.taxPerTurn = Mathf.CeilToInt(piece.taxPerTurn * INCOMPETENT_FIXED_TAX_RATE);
+            piece.acceptWeight += INCOMPETENT_FIXED_ACCEPTANCE_GAIN;
+            piece.support += INCOMPETENT_FIXED_SUPPORT_GAIN;
         }
 
         private void HandlePieceCapture(ChessPiece piece)
@@ -122,29 +196,14 @@ namespace MMBGame
                 return;
             }
 
-            if (boardManager == null)
-            {
-                boardManager = FindObjectOfType<BoardManager>();
-            }
-
-            if (politicsManager == null)
-            {
-                politicsManager = FindObjectOfType<PoliticsManager>();
-            }
-
+            EnsureReferences();
             if (boardManager == null || boardManager.BoardState == null || politicsManager == null)
             {
                 return;
             }
 
             PlayerState player = politicsManager.GetCurrentPlayer(piece.color);
-            if (player == null)
-            {
-                return;
-            }
-
-            KingState state = KingStateEvaluator.Evaluate(player, boardManager.BoardState);
-            if (state != KingState.Sage)
+            if (player == null || KingStateEvaluator.Evaluate(player, boardManager.BoardState) != KingState.Sage)
             {
                 return;
             }
@@ -161,7 +220,10 @@ namespace MMBGame
 
         private void EnsureHonorChangeHandler(PlayerState player, PieceColor color)
         {
-            RemoveHonorChangeHandler(color);
+            if (honorChangeHandlers.ContainsKey(color))
+            {
+                return;
+            }
 
             Action<int> handler = delta =>
             {
@@ -170,7 +232,13 @@ namespace MMBGame
                     return;
                 }
 
-                int penalty = Mathf.Abs(delta) / 2;
+                if (suppressNextHonorDecreasePenaltyColors.Contains(color))
+                {
+                    suppressNextHonorDecreasePenaltyColors.Remove(color);
+                    return;
+                }
+
+                int penalty = Mathf.CeilToInt(Mathf.Abs(delta) / 2f);
                 if (penalty <= 0)
                 {
                     return;
@@ -200,18 +268,50 @@ namespace MMBGame
             honorChangeHandlers.Remove(color);
         }
 
+        private int CountPieces(BoardState board, PieceColor color, Func<ChessPiece, bool> predicate)
+        {
+            int count = 0;
+            List<ChessPiece> pieces = board.GetAllPieces();
+            for (int i = 0; i < pieces.Count; i++)
+            {
+                ChessPiece piece = pieces[i];
+                if (piece != null && piece.color == color && predicate(piece))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
         private void ApplyToAllPieces(BoardState board, PieceColor color, Action<ChessPiece> effect)
         {
-            for (int file = 0; file < 8; file++)
+            List<ChessPiece> pieces = board.GetAllPieces();
+            for (int i = 0; i < pieces.Count; i++)
             {
-                for (int rank = 0; rank < 8; rank++)
+                ChessPiece piece = pieces[i];
+                if (piece != null && piece.color == color && IsPoliticalPiece(piece))
                 {
-                    ChessPiece piece = board.GetPiece(file, rank);
-                    if (piece != null && piece.color == color)
-                    {
-                        effect(piece);
-                    }
+                    effect(piece);
                 }
+            }
+        }
+
+        private bool IsPoliticalPiece(ChessPiece piece)
+        {
+            return piece.type != PieceType.Barricade && piece.type != PieceType.Trebuchet;
+        }
+
+        private void EnsureReferences()
+        {
+            if (boardManager == null)
+            {
+                boardManager = FindObjectOfType<BoardManager>();
+            }
+
+            if (politicsManager == null)
+            {
+                politicsManager = FindObjectOfType<PoliticsManager>();
             }
         }
     }

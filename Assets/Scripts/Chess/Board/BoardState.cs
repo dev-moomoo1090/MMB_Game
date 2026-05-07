@@ -17,6 +17,7 @@ namespace MMBGame
         public List<Move> moveHistory;
         public Dictionary<string, int> positionHistory;
         public List<ChessPiece> offBoardPieces;
+        public List<ChessPiece> capturedThisTurn;
         public bool roadActive;
         public int roadAFile;
         public int roadARank;
@@ -38,6 +39,7 @@ namespace MMBGame
             moveHistory = new List<Move>();
             positionHistory = new Dictionary<string, int>();
             offBoardPieces = new List<ChessPiece>();
+            capturedThisTurn = new List<ChessPiece>();
             ClearRoad();
         }
 

@@ -19,8 +19,7 @@ namespace MMBGame
             }
 
             targetPiece.support += 30;
-            targetPiece.taxModifier = 2;
-            actor.goldPerTurn += targetPiece.taxPerTurn;
+            actor.goldPerTurn += targetPiece.taxPerTurn * 2;
             return true;
         }
     }
@@ -43,9 +42,8 @@ namespace MMBGame
                 return false;
             }
 
-            targetPiece.isOffBoard = false;
             targetPiece.support -= 50;
-            actor.goldPerTurn -= targetPiece.taxPerTurn;
+            actor.goldPerTurn -= targetPiece.taxPerTurn * 2;
             return true;
         }
     }

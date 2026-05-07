@@ -54,6 +54,7 @@ namespace MMBGame
         private void CheckRebellion(ChessPiece piece)
         {
             float defectionChance = (10 - piece.support) * 2f + (-piece.disposition) * 0.1f;
+            defectionChance = ApplyKingStateDefectionModifiers(piece, defectionChance);
             defectionChance = Mathf.Clamp(defectionChance, 0f, 80f);
 
             if (defectionChance > 0f)
@@ -62,7 +63,7 @@ namespace MMBGame
                 if (roll < defectionChance)
                 {
                     piece.color = piece.color == PieceColor.White ? PieceColor.Black : PieceColor.White;
-                    piece.side = PieceSideResolver.Resolve(piece.type, piece.file);
+                    piece.side = PieceSideResolver.Resolve(piece.type, piece.rank);
                     piece.isBetrayed = true;
                     boardManager.RefreshPieceVisuals();
                     EventBus.Instance.PublishDefectionTriggered(piece);
@@ -72,6 +73,11 @@ namespace MMBGame
 
             float rebellionChance = (20 - piece.support) * 1.5f;
             rebellionChance += piece.rebellionWeight * 10f;
+            if (KingStateEvaluator.IsTyrant(piece.color))
+            {
+                rebellionChance += 30f;
+            }
+
             rebellionChance = Mathf.Clamp(rebellionChance, 0f, 60f);
 
             if (rebellionChance <= 0f)
@@ -89,6 +95,27 @@ namespace MMBGame
 
                 EventBus.Instance.PublishRebellionTriggered(piece);
             }
+        }
+
+        private float ApplyKingStateDefectionModifiers(ChessPiece piece, float defectionChance)
+        {
+            PieceColor opponent = piece.color == PieceColor.White ? PieceColor.Black : PieceColor.White;
+            if (KingStateEvaluator.IsBenevolent(piece.color))
+            {
+                defectionChance -= 20f;
+            }
+
+            if (KingStateEvaluator.IsBenevolent(opponent))
+            {
+                defectionChance += 10f;
+            }
+
+            if (KingStateEvaluator.IsTyrant(piece.color))
+            {
+                defectionChance += 30f;
+            }
+
+            return defectionChance;
         }
     }
 }

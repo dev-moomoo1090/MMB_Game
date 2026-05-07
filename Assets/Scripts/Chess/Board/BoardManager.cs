@@ -65,8 +65,11 @@ namespace MMBGame
             if (piece == null || piece.color != BoardState.currentTurn) return false;
             if (ObedienceSystem.IsRefused(piece))
             {
-                EventBus.Instance.PublishMovementRefused(piece);
-                return false;
+                if (HonorPiecePassiveSystem.Instance == null || !HonorPiecePassiveSystem.Instance.TryRerollMovementRefusal(piece))
+                {
+                    EventBus.Instance.PublishMovementRefused(piece);
+                    return false;
+                }
             }
 
             List<Move> legal = GetLegalMoves(fromFile, fromRank);
@@ -74,17 +77,21 @@ namespace MMBGame
             {
                 if (lm.toFile != toFile || lm.toRank != toRank) continue;
                 if (lm.specialMove == SpecialMoveType.Promotion && lm.promotionPiece != promotionPiece) continue;
+                BoardState.capturedThisTurn.Clear();
                 ChessPiece capturedPiece = GetCapturedPiece(lm);
                 if (capturedPiece != null)
                 {
                     capturedPiece.ClearOneTimeMovePatterns();
+                    BoardState.capturedThisTurn.Add(capturedPiece);
                 }
 
                 SpecialMoves.ApplyMove(BoardState, lm);
                 pieceSetupManager.ApplyPromotionSetup(BoardState, lm);
                 piece.ClearOneTimeMovePatterns();
                 BoardState.RecordPosition();
+                HonorPiecePassiveSystem.Instance?.HandlePieceMoved(piece, BoardState);
                 RefreshPieceVisuals();
+                AdvanceTurnAfterMove();
                 return true;
             }
             return false;
@@ -222,6 +229,25 @@ namespace MMBGame
             {
                 GameObject managerObject = new GameObject("PieceSetupManager");
                 pieceSetupManager = managerObject.AddComponent<BoardPieceSetupManager>();
+            }
+        }
+
+        private void AdvanceTurnAfterMove()
+        {
+            if (turnManager == null)
+            {
+                turnManager = FindFirstObjectByType<TurnManager>();
+            }
+
+            if (BoardState.capturedThisTurn.Count > 0)
+            {
+                PieceColor attacker = turnManager != null ? turnManager.CurrentColor : PieceColor.White;
+                turnManager?.EnterPrisonerPhase();
+                PrisonerPanel.Show(attacker, BoardState.capturedThisTurn, pieceSetupManager);
+            }
+            else
+            {
+                turnManager?.EndPhase();
             }
         }
 

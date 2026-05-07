@@ -10,6 +10,10 @@ namespace MMBGame
     {
         private const string PROFILE_PATH = "Assets/Prefabs/Profile/";
         private const int SORTING_ORDER = 40;
+        private const float BASE_TEXT_CHARACTER_SIZE = 0.18f;
+        private const float MIN_TEXT_CHARACTER_SIZE = 0.055f;
+        private const float TEXT_BOX_WIDTH_PADDING = 0.88f;
+        private const float TEXT_BOX_HEIGHT_PADDING = 0.78f;
 
         private Transform profileTarget;
         private SpriteRenderer profileImageRenderer;
@@ -17,6 +21,7 @@ namespace MMBGame
         private TextMesh goldText;
         private TextMesh supportText;
         private TextMesh moveText;
+        private PoliticsManager politicsManager;
 
         public void Show(BoardManager boardManager, BoardPieceVisual visual)
         {
@@ -36,9 +41,25 @@ namespace MMBGame
             EnsureBindings();
             SetProfile(piece);
             SetText(nameText, GetDisplayName(piece));
-            SetText(goldText, piece.GetEffectiveTax().ToString());
-            SetText(supportText, piece.support.ToString());
-            SetText(moveText, GetMoveText(piece));
+            if (piece.type == PieceType.King)
+            {
+                PlayerState player = GetPlayerState(piece.color);
+                int totalSupport = boardManager.BoardState != null
+                    ? KingStateEvaluator.ComputeTotalSupport(piece.color, boardManager.BoardState)
+                    : 0;
+                KingState state = player != null && boardManager.BoardState != null
+                    ? KingStateEvaluator.Evaluate(player, boardManager.BoardState)
+                    : KingState.Neutral;
+                SetText(goldText, player != null ? player.gold.ToString() : "0");
+                SetText(supportText, totalSupport.ToString());
+                SetText(moveText, GetKingStateText(state, totalSupport, player != null ? player.honor : 0));
+            }
+            else
+            {
+                SetText(goldText, piece.GetEffectiveTax().ToString());
+                SetText(supportText, piece.support.ToString());
+                SetText(moveText, GetMoveText(piece));
+            }
         }
 
         public void Clear()
@@ -102,6 +123,7 @@ namespace MMBGame
             if (currentText != null)
             {
                 FitTextScale(currentText.transform);
+                ConfigureProfileText(currentText);
                 return currentText;
             }
 
@@ -119,8 +141,9 @@ namespace MMBGame
             textMesh.anchor = TextAnchor.MiddleCenter;
             textMesh.alignment = TextAlignment.Center;
             textMesh.fontSize = 40;
-            textMesh.characterSize = 0.18f;
-            textMesh.color = new Color(0.1f, 0.08f, 0.05f, 1f);
+            textMesh.characterSize = BASE_TEXT_CHARACTER_SIZE;
+            textMesh.color = Color.white;
+            TextMeshFontApplier.Apply(textMesh);
             MeshRenderer renderer = textObject.GetComponent<MeshRenderer>();
             if (renderer != null)
             {
@@ -128,6 +151,17 @@ namespace MMBGame
             }
 
             return textMesh;
+        }
+
+        private void ConfigureProfileText(TextMesh textMesh)
+        {
+            if (textMesh == null)
+            {
+                return;
+            }
+
+            textMesh.color = Color.white;
+            TextMeshFontApplier.Apply(textMesh);
         }
 
         private void FitTextScale(Transform textTransform)
@@ -254,12 +288,98 @@ namespace MMBGame
             return GetTypeName(piece.type);
         }
 
+        private PlayerState GetPlayerState(PieceColor color)
+        {
+            if (politicsManager == null)
+            {
+                politicsManager = Object.FindFirstObjectByType<PoliticsManager>();
+            }
+
+            return politicsManager?.GetCurrentPlayer(color);
+        }
+
+        private string GetKingStateText(KingState state, int totalSupport, int honor)
+        {
+            string stateName = GetKingStateName(state);
+            string supportStr = totalSupport >= 0 ? "+" + totalSupport : totalSupport.ToString();
+            string honorStr = honor >= 0 ? "+" + honor : honor.ToString();
+            return stateName + " : " + supportStr + " / " + honorStr;
+        }
+
+        private string GetKingStateName(KingState state)
+        {
+            switch (state)
+            {
+                case KingState.Sage: return "성군";
+                case KingState.Autocrat: return "독재";
+                case KingState.DarkKing: return "암군";
+                case KingState.Tyrant: return "폭군";
+                default: return "중립";
+            }
+        }
+
         private void SetText(TextMesh textMesh, string value)
         {
             if (textMesh != null)
             {
                 textMesh.text = value;
+                FitTextToPosition(textMesh);
             }
+        }
+
+        private void FitTextToPosition(TextMesh textMesh)
+        {
+            if (textMesh == null || textMesh.transform.parent == null)
+            {
+                return;
+            }
+
+            FitTextScale(textMesh.transform);
+            ConfigureProfileText(textMesh);
+            textMesh.characterSize = BASE_TEXT_CHARACTER_SIZE;
+
+            MeshRenderer renderer = textMesh.GetComponent<MeshRenderer>();
+            if (renderer == null)
+            {
+                return;
+            }
+
+            Vector2 boxSize = ResolvePositionBoxSize(textMesh.transform.parent);
+            if (boxSize.x <= 0f || boxSize.y <= 0f)
+            {
+                return;
+            }
+
+            Bounds bounds = renderer.bounds;
+            if (bounds.size.x <= 0f || bounds.size.y <= 0f)
+            {
+                return;
+            }
+
+            float widthRatio = boxSize.x * TEXT_BOX_WIDTH_PADDING / bounds.size.x;
+            float heightRatio = boxSize.y * TEXT_BOX_HEIGHT_PADDING / bounds.size.y;
+            float ratio = Mathf.Min(1f, widthRatio, heightRatio);
+            textMesh.characterSize = Mathf.Max(MIN_TEXT_CHARACTER_SIZE, BASE_TEXT_CHARACTER_SIZE * ratio);
+        }
+
+        private Vector2 ResolvePositionBoxSize(Transform target)
+        {
+            SpriteRenderer spriteRenderer = target.GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                Bounds bounds = spriteRenderer.bounds;
+                return new Vector2(bounds.size.x, bounds.size.y);
+            }
+
+            BoxCollider2D collider = target.GetComponent<BoxCollider2D>();
+            if (collider != null)
+            {
+                Vector2 scaledSize = Vector2.Scale(collider.size, target.lossyScale);
+                return new Vector2(Mathf.Abs(scaledSize.x), Mathf.Abs(scaledSize.y));
+            }
+
+            Vector3 scale = target.lossyScale;
+            return new Vector2(Mathf.Abs(scale.x), Mathf.Abs(scale.y));
         }
     }
 }

@@ -37,6 +37,7 @@ namespace MMBGame
                 label = GetComponentInChildren<TextMesh>();
             }
 
+            TextMeshFontApplier.Apply(label);
             FitColliderToText();
             CreateTextOutline();
             SetHovered(false);
@@ -117,6 +118,7 @@ namespace MMBGame
             }
 
             CopyLabelStyle(outline);
+            TextMeshFontApplier.Apply(outline);
             return outline;
         }
 

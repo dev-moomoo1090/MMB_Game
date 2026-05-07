@@ -11,6 +11,26 @@ namespace MMBGame
         private BoardManager boardManager;
         public BoardManager BoardManager => boardManager;
 
+        public int ApplyCostModifier(int baseCost, PieceColor color)
+        {
+            if (HonorPiecePassiveSystem.Instance != null && HonorPiecePassiveSystem.Instance.TryConsumeFreeMilitaryAction(color, string.Empty))
+            {
+                return 0;
+            }
+
+            return Mathf.Max(0, Mathf.CeilToInt(baseCost * KingStateEvaluator.GetMilitaryCostMultiplier(color)));
+        }
+
+        public int ApplyCostModifier(int baseCost, PieceColor color, string actionName)
+        {
+            if (HonorPiecePassiveSystem.Instance != null && HonorPiecePassiveSystem.Instance.TryConsumeFreeMilitaryAction(color, actionName))
+            {
+                return 0;
+            }
+
+            return Mathf.Max(0, Mathf.CeilToInt(baseCost * KingStateEvaluator.GetMilitaryCostMultiplier(color)));
+        }
+
         public void Initialize()
         {
             boardManager = FindObjectOfType<BoardManager>();

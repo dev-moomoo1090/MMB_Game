@@ -186,6 +186,7 @@ namespace MMBGame
             label.fontSize = 44;
             label.characterSize = characterSize;
             label.color = Color.white;
+            TextMeshFontApplier.Apply(label);
             MeshRenderer labelRenderer = label.GetComponent<MeshRenderer>();
             if (labelRenderer != null)
             {

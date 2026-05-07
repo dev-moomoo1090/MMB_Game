@@ -11,8 +11,12 @@ namespace MMBGame
         private BoardPieceProfileDisplay profileDisplay;
         private BoardPieceVisual selectedVisual;
         private TurnManager turnManager;
+        private int selectedTargetFile = -1;
+        private int selectedTargetRank = -1;
 
         public ChessPiece SelectedPiece => selectedVisual != null ? selectedVisual.Piece : null;
+        public int SelectedTargetFile => selectedTargetFile;
+        public int SelectedTargetRank => selectedTargetRank;
 
         public void Initialize(BoardPieceVisuals newPieceVisuals)
         {
@@ -45,7 +49,14 @@ namespace MMBGame
 
         public void ClearSelection()
         {
+            if (pieceVisuals != null)
+            {
+                pieceVisuals.ClearSelection();
+            }
+
             selectedVisual = null;
+            selectedTargetFile = -1;
+            selectedTargetRank = -1;
             if (moveIndicators != null)
             {
                 moveIndicators.Hide();
@@ -63,6 +74,15 @@ namespace MMBGame
             {
                 return;
             }
+
+            if (selectedVisual == visual)
+            {
+                ClearSelection();
+                return;
+            }
+
+            selectedTargetFile = visual.File;
+            selectedTargetRank = visual.Rank;
 
             if (selectedVisual != null && TryMoveSelectedTo(visual.File, visual.Rank))
             {
@@ -83,6 +103,11 @@ namespace MMBGame
                 return;
             }
 
+            if (FrontDeployPanel.IsOpen || PrisonerPanel.IsOpen)
+            {
+                return;
+            }
+
             Vector2 screenPosition = mouse.position.ReadValue();
             Vector3 worldPosition = Camera.main.ScreenToWorldPoint(new Vector3(screenPosition.x, screenPosition.y, -Camera.main.transform.position.z));
             Collider2D collider = Physics2D.OverlapPoint(worldPosition);
@@ -96,14 +121,19 @@ namespace MMBGame
                 }
             }
 
-            if (selectedVisual == null || pieceVisuals == null)
+            if (pieceVisuals == null)
             {
                 return;
             }
 
             if (pieceVisuals.TryGetLogicalSquare(worldPosition, out int file, out int rank))
             {
-                TryMoveSelectedTo(file, rank);
+                selectedTargetFile = file;
+                selectedTargetRank = rank;
+                if (selectedVisual != null)
+                {
+                    TryMoveSelectedTo(file, rank);
+                }
             }
         }
 
