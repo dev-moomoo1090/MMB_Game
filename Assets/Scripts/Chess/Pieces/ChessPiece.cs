@@ -79,7 +79,7 @@ namespace MMBGame
                 return;
             }
 
-            support = definition.initialSupport;
+            support = PoliticalStatService.ClampSupport(definition.initialSupport);
             taxPerTurn = definition.initialTaxPerTurn;
             if (definition.baseMovePatterns == null || definition.baseMovePatterns.Count == 0)
             {

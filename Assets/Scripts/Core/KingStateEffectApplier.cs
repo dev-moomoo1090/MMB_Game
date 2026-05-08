@@ -29,6 +29,21 @@ namespace MMBGame
 
         public static KingStateEffectApplier Instance => instance;
 
+        public int GetIncompetentTurnsElapsed(PieceColor color)
+        {
+            return incompetentTurnCounts.TryGetValue(color, out int count) ? count : 0;
+        }
+
+        public int GetIncompetentTurnsRemaining(PieceColor color)
+        {
+            return Mathf.Max(0, INCOMPETENT_SURVIVAL_TURNS - GetIncompetentTurnsElapsed(color));
+        }
+
+        public int GetIncompetentSurvivalTurns()
+        {
+            return INCOMPETENT_SURVIVAL_TURNS;
+        }
+
         public void Initialize()
         {
             instance = this;
@@ -42,14 +57,11 @@ namespace MMBGame
 
             EventBus.Instance.OnPhaseChanged -= HandlePhaseChanged;
             EventBus.Instance.OnPhaseChanged += HandlePhaseChanged;
-            EventBus.Instance.OnPieceCapturePending -= HandlePieceCapture;
-            EventBus.Instance.OnPieceCapturePending += HandlePieceCapture;
         }
 
         private void OnDestroy()
         {
             EventBus.Instance.OnPhaseChanged -= HandlePhaseChanged;
-            EventBus.Instance.OnPieceCapturePending -= HandlePieceCapture;
             RemoveHonorChangeHandler(PieceColor.White);
             RemoveHonorChangeHandler(PieceColor.Black);
             if (instance == this)
@@ -120,26 +132,20 @@ namespace MMBGame
 
         private void ApplyBenevolentEffect(BoardState board, PlayerState player, PieceColor color)
         {
-            if (KingStateEvaluator.IsFixedBenevolent(color))
-            {
-                ApplyToAllPieces(board, color, piece => PoliticalStatService.ChangeSupport(piece, INCOMPETENT_FIXED_SUPPORT_GAIN, "FixedBenevolent"));
-                return;
-            }
-
             int supportGain = Mathf.CeilToInt(player.honor / 50f);
             if (supportGain > 0)
             {
                 ApplyToAllPieces(board, color, piece => PoliticalStatService.ChangeSupport(piece, supportGain, "Benevolent"));
             }
 
-            int highSupportCount = CountPieces(board, color, piece => piece.support >= 51);
-            int totalPieces = CountPieces(board, color, piece => true);
+            int highSupportCount = CountPieces(board, color, piece => IsPoliticalPiece(piece) && piece.support >= 51);
+            int totalPieces = CountPieces(board, color, IsPoliticalPiece);
             if (highSupportCount <= 0 || totalPieces <= 0)
             {
                 return;
             }
 
-            int totalSupportScore = KingStateEvaluator.ComputeTotalSupport(color, board);
+            int totalSupportScore = SumSupport(board, color);
             int honorGain = Mathf.FloorToInt((float)totalSupportScore / highSupportCount * totalPieces);
             if (honorGain > 0)
             {
@@ -187,35 +193,6 @@ namespace MMBGame
         {
             piece.taxPerTurn = Mathf.CeilToInt(piece.taxPerTurn * INCOMPETENT_FIXED_TAX_RATE);
             PoliticalStatService.ChangeSupport(piece, INCOMPETENT_FIXED_SUPPORT_GAIN, "IncompetentFixed");
-        }
-
-        private void HandlePieceCapture(ChessPiece piece)
-        {
-            if (piece == null)
-            {
-                return;
-            }
-
-            EnsureReferences();
-            if (boardManager == null || boardManager.BoardState == null || politicsManager == null)
-            {
-                return;
-            }
-
-            PlayerState player = politicsManager.GetCurrentPlayer(piece.color);
-            if (player == null || KingStateEvaluator.Evaluate(player, boardManager.BoardState) != KingState.Sage)
-            {
-                return;
-            }
-
-            int value = BoardEvaluator.GetPieceValue(piece.type);
-            if (value <= 0)
-            {
-                return;
-            }
-
-            ApplyToAllPieces(boardManager.BoardState, piece.color, targetPiece => PoliticalStatService.ChangeSupport(targetPiece, -value, "BenevolentCapturePenalty"));
-            player.AddHonor(-value);
         }
 
         private void EnsureHonorChangeHandler(PlayerState player, PieceColor color)
@@ -282,6 +259,22 @@ namespace MMBGame
             }
 
             return count;
+        }
+
+        private int SumSupport(BoardState board, PieceColor color)
+        {
+            int total = 0;
+            List<ChessPiece> pieces = board.GetAllPieces();
+            for (int i = 0; i < pieces.Count; i++)
+            {
+                ChessPiece piece = pieces[i];
+                if (piece != null && piece.color == color && IsPoliticalPiece(piece))
+                {
+                    total += piece.support;
+                }
+            }
+
+            return total;
         }
 
         private void ApplyToAllPieces(BoardState board, PieceColor color, Action<ChessPiece> effect)

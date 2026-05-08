@@ -35,14 +35,37 @@ public class CommandBook : MonoBehaviour
         var worldClick = Camera.main.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 0f));
         worldClick.z = sr.transform.position.z;
 
-        RaycastHit2D hit = Physics2D.GetRayIntersection(Camera.main.ScreenPointToRay(screenPos));
-        if (hit.collider != null && hit.collider.GetComponent("CommandActionButton") != null) return;
-        if (hit.collider != null && hit.collider.GetComponent<RegimeActionButtonHitbox>() != null) return;
+        if (IsPointerOverButton(worldClick)) return;
 
         if (!sr.bounds.Contains(worldClick)) return;
 
         bool goRight = worldClick.x > sr.bounds.center.x;
         if (goRight) TurnPage(+1);
+    }
+
+    private bool IsPointerOverButton(Vector3 worldClick)
+    {
+        Collider2D[] hits = Physics2D.OverlapPointAll(worldClick);
+        for (int i = 0; i < hits.Length; i++)
+        {
+            Collider2D hit = hits[i];
+            if (hit == null)
+            {
+                continue;
+            }
+
+            if (hit.GetComponentInParent<CommandActionButton>() != null)
+            {
+                return true;
+            }
+
+            if (hit.GetComponentInParent<RegimeActionButtonHitbox>() != null)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     void TurnPage(int direction)

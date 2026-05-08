@@ -40,7 +40,7 @@ namespace MMBGame
                 ChessPiece piece = pieces[i];
                 if (piece != null && piece.color == actorColor)
                 {
-                    PoliticalStatService.ChangeSupport(piece, -supportPenalty, ActionName);
+                    PoliticalStatService.ChangeSupportFromPoliticalAction(piece, -supportPenalty, actorColor, ActionName);
                 }
             }
 

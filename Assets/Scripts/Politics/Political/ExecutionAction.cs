@@ -32,12 +32,12 @@ namespace MMBGame
                     ChessPiece piece = pieces[i];
                     if (piece != null && piece.color == actorColor)
                     {
-                        PoliticalStatService.ChangeSupport(piece, -basePenalty, ActionName);
+                        PoliticalStatService.ChangeSupportFromPoliticalAction(piece, -basePenalty, actorColor, ActionName);
                     }
                 }
 
                 PlayerState actor = manager.GetActorState(actorColor);
-                actor?.AddHonor(-basePenalty);
+                PoliticalStatService.ChangeHonor(actor, -basePenalty, actorColor, true);
             }
 
             int summonFile = target.isOffBoard ? target.offBoardOrigin.col : target.file;

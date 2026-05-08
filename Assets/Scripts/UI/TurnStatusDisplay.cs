@@ -15,12 +15,14 @@ namespace MMBGame
         [SerializeField] private float depthFromCamera = 10f;
         [SerializeField] private float characterSize = 0.13f;
         [SerializeField] private Vector2 backgroundSize = new Vector2(1.65f, 0.42f);
+        [SerializeField] private Vector2 turnNumberOffset = new Vector2(1.36f, 0.08f);
         [SerializeField] private Vector2 iconSize = new Vector2(0.42f, 0.42f);
         [SerializeField] private Vector2 iconOffset = new Vector2(0f, 0.56f);
         [SerializeField] private Vector2 tooltipSize = new Vector2(4.25f, 1.55f);
         [SerializeField] private Vector2 tooltipOffset = new Vector2(2.35f, 0.58f);
 
         private TextMesh label;
+        private TextMesh turnNumberLabel;
         private TextMesh iconLabel;
         private TextMesh tooltipLabel;
         private SpriteRenderer background;
@@ -30,13 +32,16 @@ namespace MMBGame
         private GameObject tooltipRoot;
         private BoardManager boardManager;
         private PoliticsManager politicsManager;
+        private TurnManager turnManager;
         private PieceColor currentColor = PieceColor.White;
         private GamePhase currentPhase = GamePhase.PoliticsPhase;
         private KingState currentState = KingState.Neutral;
+        private int currentTurnNumber = 1;
 
         private void Awake()
         {
             EnsureVisuals();
+            SyncTurnManagerState();
             FindInitialTurnState();
             UpdateLabel();
         }
@@ -75,7 +80,7 @@ namespace MMBGame
 
         private void FindInitialTurnState()
         {
-            TurnManager turnManager = FindFirstObjectByType<TurnManager>();
+            turnManager = FindFirstObjectByType<TurnManager>();
             if (turnManager == null)
             {
                 return;
@@ -87,13 +92,16 @@ namespace MMBGame
             }
 
             currentPhase = turnManager.CurrentPhase;
+            currentTurnNumber = turnManager.TurnNumber;
         }
 
         private void UpdateLabel()
         {
             EnsureVisuals();
+            SyncTurnManagerState();
             currentState = ResolveCurrentState();
             label.text = GetColorText(currentColor) + " " + GetPhaseText(currentPhase) + " 턴";
+            turnNumberLabel.text = currentTurnNumber.ToString();
             iconLabel.text = GetKingStateIconText(currentState);
             iconBackground.color = GetKingStateColor(currentState);
             if (tooltipRoot != null && tooltipRoot.activeSelf)
@@ -147,6 +155,11 @@ namespace MMBGame
                 CreateLabel();
             }
 
+            if (turnNumberLabel == null)
+            {
+                CreateTurnNumberLabel();
+            }
+
             if (iconBackground == null || iconLabel == null || iconCollider == null)
             {
                 CreateIcon();
@@ -183,6 +196,25 @@ namespace MMBGame
             label.color = Color.white;
             TextMeshFontApplier.Apply(label);
             MeshRenderer labelRenderer = label.GetComponent<MeshRenderer>();
+            if (labelRenderer != null)
+            {
+                labelRenderer.sortingOrder = TEXT_SORTING_ORDER;
+            }
+        }
+
+        private void CreateTurnNumberLabel()
+        {
+            GameObject labelObject = new GameObject("TurnNumberLabel");
+            labelObject.transform.SetParent(transform, false);
+            labelObject.transform.localPosition = new Vector3(turnNumberOffset.x, turnNumberOffset.y, -0.01f);
+            turnNumberLabel = labelObject.AddComponent<TextMesh>();
+            turnNumberLabel.anchor = TextAnchor.MiddleCenter;
+            turnNumberLabel.alignment = TextAlignment.Center;
+            turnNumberLabel.fontSize = 48;
+            turnNumberLabel.characterSize = characterSize;
+            turnNumberLabel.color = Color.white;
+            TextMeshFontApplier.Apply(turnNumberLabel);
+            MeshRenderer labelRenderer = turnNumberLabel.GetComponent<MeshRenderer>();
             if (labelRenderer != null)
             {
                 labelRenderer.sortingOrder = TEXT_SORTING_ORDER;
@@ -321,6 +353,28 @@ namespace MMBGame
             {
                 politicsManager = FindFirstObjectByType<PoliticsManager>();
             }
+
+            if (turnManager == null)
+            {
+                turnManager = FindFirstObjectByType<TurnManager>();
+            }
+        }
+
+        private void SyncTurnManagerState()
+        {
+            EnsureManagers();
+            if (turnManager == null)
+            {
+                return;
+            }
+
+            if (turnManager.CurrentColor != PieceColor.None)
+            {
+                currentColor = turnManager.CurrentColor;
+            }
+
+            currentPhase = turnManager.CurrentPhase;
+            currentTurnNumber = turnManager.TurnNumber;
         }
 
         private string GetKingStateIconText(KingState state)
@@ -349,6 +403,11 @@ namespace MMBGame
 
         private string GetKingStateTooltipText(KingState state)
         {
+            if (state == KingState.DarkKing)
+            {
+                return GetDarkKingTooltipText();
+            }
+
             switch (state)
             {
                 case KingState.Sage:
@@ -362,6 +421,15 @@ namespace MMBGame
                 default:
                     return "중립\n적용 중인 특수 효과 없음";
             }
+        }
+
+        private string GetDarkKingTooltipText()
+        {
+            KingStateEffectApplier applier = KingStateEffectApplier.Instance;
+            int elapsed = applier != null ? applier.GetIncompetentTurnsElapsed(currentColor) : 0;
+            int remaining = applier != null ? applier.GetIncompetentTurnsRemaining(currentColor) : 20;
+            int total = applier != null ? applier.GetIncompetentSurvivalTurns() : 20;
+            return "암군\n현재 " + elapsed + "/" + total + "턴 진행\n성군 고정까지 " + remaining + "턴 남음";
         }
 
         private Sprite CreateBackgroundSprite()

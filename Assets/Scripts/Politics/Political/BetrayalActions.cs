@@ -53,7 +53,7 @@ namespace MMBGame
                 return false;
             }
 
-            PoliticalStatService.ChangeSupport(target, -5, ActionName);
+            PoliticalStatService.ChangeSupportFromPoliticalAction(target, -5, actorColor, ActionName);
             target.acceptWeight += 5;
             EventBus.Instance.PublishIntelligenceGathered(target);
             return true;
@@ -73,7 +73,7 @@ namespace MMBGame
                 return false;
             }
 
-            PoliticalStatService.ChangeSupport(target, -8, ActionName);
+            PoliticalStatService.ChangeSupportFromPoliticalAction(target, -8, actorColor, ActionName);
             target.rebellionWeight += 1f;
             EventBus.Instance.PublishIntelligenceGathered(target);
             return true;

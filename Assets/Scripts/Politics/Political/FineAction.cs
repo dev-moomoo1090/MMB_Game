@@ -25,7 +25,7 @@ namespace MMBGame
             int baseTax = Math.Max(1, target.taxPerTurn);
             int legitimacyFactor = 5 - target.punishCount;
             int penalty = Math.Max(1, value * legitimacyFactor * legitimacyFactor / (baseTax * 3));
-            PoliticalStatService.ChangeSupport(target, -penalty, ActionName);
+            PoliticalStatService.ChangeSupportFromPoliticalAction(target, -penalty, actorColor, ActionName);
             target.punishCount = 0;
             return true;
         }

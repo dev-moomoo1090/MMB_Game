@@ -17,15 +17,18 @@ namespace MMBGame
         private int politicsActionsRemaining;
         private int whiteQueuedPoliticsBonus;
         private int blackQueuedPoliticsBonus;
+        private int turnNumber = 1;
 
         public PieceColor CurrentColor => currentColor;
         public GamePhase CurrentPhase => currentPhase;
         public int PoliticsActionsRemaining => politicsActionsRemaining;
+        public int TurnNumber => turnNumber;
 
         public void StartGame()
         {
             currentColor = PieceColor.White;
             currentPhase = GamePhase.PoliticsPhase;
+            turnNumber = 1;
             politicsActionsRemaining = GetPoliticsActionsForTurn(currentColor);
             EventBus.Instance.PublishTurnChanged(currentColor);
             EventBus.Instance.PublishPhaseChanged(currentPhase);
@@ -47,6 +50,11 @@ namespace MMBGame
             }
 
             currentColor = currentColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
+            if (currentColor == PieceColor.White)
+            {
+                turnNumber++;
+            }
+
             currentPhase = GamePhase.PoliticsPhase;
             politicsActionsRemaining = GetPoliticsActionsForTurn(currentColor);
             EventBus.Instance.PublishTurnChanged(currentColor);
