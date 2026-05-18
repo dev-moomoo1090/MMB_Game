@@ -37,70 +37,17 @@ namespace MMBGame
 
         private void Start()
         {
-            if (boardManager == null)
-            {
-                boardManager = FindObjectOfType<BoardManager>();
-            }
-
-            if (turnManager == null)
-            {
-                turnManager = FindObjectOfType<TurnManager>();
-            }
-
-            if (politicsManager == null)
-            {
-                politicsManager = FindObjectOfType<PoliticsManager>();
-            }
-
-            if (militaryManager == null)
-            {
-                militaryManager = FindObjectOfType<MilitaryManager>();
-            }
-
-            if (politicalManager == null)
-            {
-                politicalManager = FindObjectOfType<PoliticalManager>();
-            }
-
-            if (rebellionSystem == null)
-            {
-                rebellionSystem = FindObjectOfType<RebellionSystem>();
-            }
-
-            if (kingStateEffectApplier == null)
-            {
-                kingStateEffectApplier = FindObjectOfType<KingStateEffectApplier>();
-            }
-
-            if (honorPiecePassiveSystem == null)
-            {
-                honorPiecePassiveSystem = FindObjectOfType<HonorPiecePassiveSystem>();
-            }
-
-            if (honorPiecePassiveSystem == null)
-            {
-                honorPiecePassiveSystem = gameObject.AddComponent<HonorPiecePassiveSystem>();
-            }
-
-            if (regimeActionButtons == null)
-            {
-                regimeActionButtons = FindFirstObjectByType<RegimeActionButtons>();
-            }
-
-            if (regimeActionButtons == null)
-            {
-                regimeActionButtons = gameObject.AddComponent<RegimeActionButtons>();
-            }
-
-            if (autonomousMovement == null)
-            {
-                autonomousMovement = FindObjectOfType<AutonomousMovement>();
-            }
-
-            if (stockfishBridge == null)
-            {
-                stockfishBridge = FindObjectOfType<StockfishBridge>();
-            }
+            boardManager = SceneComponentResolver.Resolve(boardManager);
+            turnManager = SceneComponentResolver.Resolve(turnManager);
+            politicsManager = SceneComponentResolver.Resolve(politicsManager);
+            militaryManager = SceneComponentResolver.Resolve(militaryManager);
+            politicalManager = SceneComponentResolver.Resolve(politicalManager);
+            rebellionSystem = SceneComponentResolver.Resolve(rebellionSystem);
+            kingStateEffectApplier = SceneComponentResolver.Resolve(kingStateEffectApplier);
+            honorPiecePassiveSystem = SceneComponentResolver.ResolveOrAdd(honorPiecePassiveSystem, gameObject);
+            regimeActionButtons = SceneComponentResolver.ResolveOrAdd(regimeActionButtons, gameObject);
+            autonomousMovement = SceneComponentResolver.Resolve(autonomousMovement);
+            stockfishBridge = SceneComponentResolver.Resolve(stockfishBridge);
 
             if (politicsManager != null)
             {

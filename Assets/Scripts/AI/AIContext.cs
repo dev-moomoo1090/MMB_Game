@@ -53,19 +53,14 @@ namespace MMBGame.AI
             => color == PieceColor.White ? PieceColor.Black : PieceColor.White;
 
         public bool IsSpecial(ChessPiece p)
-            => p.type == PieceType.Barricade || p.type == PieceType.Trebuchet;
+            => PieceClassifier.IsObstacle(p);
 
         public static int PieceValue(PieceType t)
         {
             switch (t)
             {
-                case PieceType.Pawn:   return 100;
-                case PieceType.Knight: return 300;
-                case PieceType.Bishop: return 300;
-                case PieceType.Rook:   return 500;
-                case PieceType.Queen:  return 900;
                 case PieceType.King:   return 10000;
-                default:               return 0;
+                default:               return BoardEvaluator.GetPieceValue(t) * 100;
             }
         }
     }

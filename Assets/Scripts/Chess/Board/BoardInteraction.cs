@@ -21,15 +21,8 @@ namespace MMBGame
         public void Initialize(BoardPieceVisuals newPieceVisuals)
         {
             pieceVisuals = newPieceVisuals;
-            if (boardManager == null)
-            {
-                boardManager = FindFirstObjectByType<BoardManager>();
-            }
-
-            if (turnManager == null)
-            {
-                turnManager = FindFirstObjectByType<TurnManager>();
-            }
+            boardManager = SceneComponentResolver.Resolve(boardManager);
+            turnManager = SceneComponentResolver.Resolve(turnManager);
 
             EnsureMoveIndicators();
             EnsureProfileDisplay();
@@ -149,10 +142,7 @@ namespace MMBGame
                 return false;
             }
 
-            if (boardManager == null)
-            {
-                boardManager = FindFirstObjectByType<BoardManager>();
-            }
+            boardManager = SceneComponentResolver.Resolve(boardManager);
 
             if (boardManager == null || !boardManager.TryMove(selectedVisual.File, selectedVisual.Rank, file, rank))
             {
@@ -205,10 +195,7 @@ namespace MMBGame
 
         private void EnsureBoardManager()
         {
-            if (boardManager == null)
-            {
-                boardManager = FindFirstObjectByType<BoardManager>();
-            }
+            boardManager = SceneComponentResolver.Resolve(boardManager);
         }
 
         public void RefreshSelectionProfile()
@@ -239,10 +226,7 @@ namespace MMBGame
 
         private bool IsChessPhase()
         {
-            if (turnManager == null)
-            {
-                turnManager = FindFirstObjectByType<TurnManager>();
-            }
+            turnManager = SceneComponentResolver.Resolve(turnManager);
 
             return turnManager != null && turnManager.CurrentPhase == GamePhase.ChessPhase;
         }

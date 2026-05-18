@@ -30,7 +30,7 @@ namespace MMBGame
             }
 
             ChessPiece target = state.GetPiece(targetFile, targetRank);
-            if (target == null || (!IsObstacle(target) && target.GetMovementControllerColor() != piece.GetMovementControllerColor()))
+            if (target == null || (!PieceClassifier.IsObstacle(target) && target.GetMovementControllerColor() != piece.GetMovementControllerColor()))
             {
                 moves.Add(new Move(piece.file, piece.rank, targetFile, targetRank));
             }
@@ -65,7 +65,7 @@ namespace MMBGame
                         }
                         else
                         {
-                            if (IsObstacle(target))
+                            if (PieceClassifier.IsObstacle(target))
                             {
                                 break;
                             }
@@ -83,7 +83,7 @@ namespace MMBGame
                     ChessPiece target = state.GetPiece(f, r);
                     if (target == null && !pat.captureOnly)
                         moves.Add(new Move(piece.file, piece.rank, f, r));
-                    else if (target != null && !IsObstacle(target) && target.GetMovementControllerColor() != piece.GetMovementControllerColor() && !pat.moveOnly)
+                    else if (target != null && !PieceClassifier.IsObstacle(target) && target.GetMovementControllerColor() != piece.GetMovementControllerColor() && !pat.moveOnly)
                         moves.Add(new Move(piece.file, piece.rank, f, r));
                 }
             }
@@ -110,7 +110,7 @@ namespace MMBGame
                     continue;
                 }
 
-                if (IsObstacle(target))
+                if (PieceClassifier.IsObstacle(target))
                 {
                     break;
                 }
@@ -130,11 +130,6 @@ namespace MMBGame
 
                 break;
             }
-        }
-
-        private static bool IsObstacle(ChessPiece piece)
-        {
-            return piece.type == PieceType.Barricade || piece.type == PieceType.Trebuchet;
         }
 
         private static void GeneratePawnMoves(BoardState state, ChessPiece pawn, List<Move> moves)
@@ -162,7 +157,7 @@ namespace MMBGame
                 int cr = pawn.rank + dr;
                 if (!state.IsInBounds(fwd, cr)) continue;
                 ChessPiece target = state.GetPiece(fwd, cr);
-                if (target != null && !IsObstacle(target) && target.GetMovementControllerColor() != pawn.GetMovementControllerColor())
+                if (target != null && !PieceClassifier.IsObstacle(target) && target.GetMovementControllerColor() != pawn.GetMovementControllerColor())
                 {
                     if (fwd == promoFile) AddPromotionMoves(moves, pawn.file, pawn.rank, fwd, cr);
                     else moves.Add(new Move(pawn.file, pawn.rank, fwd, cr));

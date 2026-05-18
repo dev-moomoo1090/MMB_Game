@@ -21,8 +21,8 @@ namespace MMBGame
 
         public void Initialize()
         {
-            turnManager = FindFirstObjectByType<TurnManager>();
-            politicalManager = FindFirstObjectByType<PoliticalManager>();
+            turnManager = SceneComponentResolver.Resolve<TurnManager>();
+            politicalManager = SceneComponentResolver.Resolve<PoliticalManager>();
             EnsureVisuals();
         }
 
@@ -43,12 +43,12 @@ namespace MMBGame
         {
             if (turnManager == null)
             {
-                turnManager = FindFirstObjectByType<TurnManager>();
+                turnManager = SceneComponentResolver.Resolve<TurnManager>();
             }
 
             if (politicalManager == null)
             {
-                politicalManager = FindFirstObjectByType<PoliticalManager>();
+                politicalManager = SceneComponentResolver.Resolve<PoliticalManager>();
             }
         }
 
@@ -192,7 +192,7 @@ namespace MMBGame
             GameObject backgroundObject = new GameObject("Background");
             backgroundObject.transform.SetParent(buttonObject.transform, false);
             SpriteRenderer background = backgroundObject.AddComponent<SpriteRenderer>();
-            background.sprite = CreateBackgroundSprite();
+            background.sprite = RuntimeUiFactory.GetPixelSprite();
             background.sortingOrder = BACKGROUND_SORTING_ORDER;
             backgroundObject.transform.localScale = new Vector3(buttonSize.x, buttonSize.y, 1f);
 
@@ -219,14 +219,6 @@ namespace MMBGame
             }
 
             return new RegimeButton(background, collider);
-        }
-
-        private Sprite CreateBackgroundSprite()
-        {
-            Texture2D texture = new Texture2D(1, 1);
-            texture.SetPixel(0, 0, Color.white);
-            texture.Apply();
-            return Sprite.Create(texture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
         }
 
         private class RegimeButton

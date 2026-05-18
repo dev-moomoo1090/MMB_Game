@@ -220,11 +220,7 @@ namespace MMBGame
 
         private void EnsurePieceSetupManager()
         {
-            if (pieceSetupManager == null)
-            {
-                pieceSetupManager = FindObjectOfType<BoardPieceSetupManager>();
-            }
-
+            pieceSetupManager = SceneComponentResolver.Resolve(pieceSetupManager);
             if (pieceSetupManager == null)
             {
                 GameObject managerObject = new GameObject("PieceSetupManager");
@@ -234,10 +230,7 @@ namespace MMBGame
 
         private void AdvanceTurnAfterMove()
         {
-            if (turnManager == null)
-            {
-                turnManager = FindFirstObjectByType<TurnManager>();
-            }
+            turnManager = SceneComponentResolver.Resolve(turnManager);
 
             if (BoardState.capturedThisTurn.Count > 0)
             {
@@ -253,10 +246,7 @@ namespace MMBGame
 
         private bool IsChessPhase()
         {
-            if (turnManager == null)
-            {
-                turnManager = FindFirstObjectByType<TurnManager>();
-            }
+            turnManager = SceneComponentResolver.Resolve(turnManager);
 
             return turnManager == null || turnManager.CurrentPhase == GamePhase.ChessPhase;
         }

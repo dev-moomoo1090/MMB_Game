@@ -48,7 +48,7 @@ namespace MMBGame
                 return;
             }
 
-            CommandActionTooltip existing = FindFirstObjectByType<CommandActionTooltip>();
+            CommandActionTooltip existing = SceneComponentResolver.Resolve<CommandActionTooltip>();
             if (existing != null)
             {
                 instance = existing;
@@ -132,7 +132,7 @@ namespace MMBGame
             GameObject backgroundObject = new GameObject("Background");
             backgroundObject.transform.SetParent(root.transform, false);
             background = backgroundObject.AddComponent<SpriteRenderer>();
-            background.sprite = CreateBackgroundSprite();
+            background.sprite = RuntimeUiFactory.GetPixelSprite();
             background.color = new Color(0.16f, 0.16f, 0.16f, 0.78f);
             background.sortingOrder = BACKGROUND_SORTING_ORDER;
             hoverCollider = root.AddComponent<BoxCollider2D>();
@@ -271,12 +271,5 @@ namespace MMBGame
             return anchorCollider.OverlapPoint(worldPosition);
         }
 
-        private Sprite CreateBackgroundSprite()
-        {
-            Texture2D texture = new Texture2D(1, 1);
-            texture.SetPixel(0, 0, Color.white);
-            texture.Apply();
-            return Sprite.Create(texture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
-        }
     }
 }

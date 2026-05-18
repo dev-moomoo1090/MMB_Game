@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MMBGame
 {
-    public class PoliticsManager : MonoBehaviour
+    public partial class PoliticsManager : MonoBehaviour
     {
         [SerializeField] private int startingGold = 100;
 
@@ -37,7 +37,7 @@ namespace MMBGame
                 new RearDeployAction(),
                 new FrontDeployAction()
             };
-            boardManager = FindObjectOfType<BoardManager>();
+            boardManager = SceneComponentResolver.Resolve<BoardManager>();
             EventBus.Instance.OnTurnChanged -= HandleTurnChanged;
             EventBus.Instance.OnTurnChanged += HandleTurnChanged;
         }
@@ -123,10 +123,7 @@ namespace MMBGame
 
         private int GetPieceTaxIncome(PieceColor color)
         {
-            if (boardManager == null)
-            {
-                boardManager = FindObjectOfType<BoardManager>();
-            }
+            boardManager = SceneComponentResolver.Resolve(boardManager);
 
             if (boardManager == null || boardManager.BoardState == null)
             {
@@ -152,10 +149,7 @@ namespace MMBGame
 
         private void ResetPiecesForTurn()
         {
-            if (boardManager == null)
-            {
-                boardManager = FindObjectOfType<BoardManager>();
-            }
+            boardManager = SceneComponentResolver.Resolve(boardManager);
 
             if (boardManager == null || boardManager.BoardState == null)
             {
@@ -173,131 +167,6 @@ namespace MMBGame
 
                 piece.ResetTurnModifiers();
             }
-        }
-
-        private FiscalResultSnapshot CaptureFiscalSnapshot(PlayerState actor, ChessPiece target)
-        {
-            FiscalResultSnapshot snapshot = new FiscalResultSnapshot();
-            snapshot.gold = actor != null ? actor.gold : 0;
-            snapshot.goldPerTurn = actor != null ? actor.goldPerTurn : 0;
-            snapshot.target = target;
-            snapshot.targetSupport = target != null ? target.support : 0;
-            snapshot.targetTaxModifier = target != null ? target.taxModifier : 1;
-            snapshot.targetIsOffBoard = target != null && target.isOffBoard;
-            snapshot.pieceSupports = new Dictionary<ChessPiece, int>();
-
-            if (boardManager != null && boardManager.BoardState != null)
-            {
-                List<ChessPiece> pieces = boardManager.BoardState.GetAllPieces();
-                for (int i = 0; i < pieces.Count; i++)
-                {
-                    ChessPiece piece = pieces[i];
-                    if (piece != null)
-                    {
-                        snapshot.pieceSupports[piece] = piece.support;
-                    }
-                }
-            }
-
-            return snapshot;
-        }
-
-        private string BuildFiscalResultText(string actionName, PlayerState actor, ChessPiece target, FiscalResultSnapshot before, int inputValue)
-        {
-            ChessPiece resultTarget = target;
-            int supportDelta = target != null ? target.support - before.targetSupport : 0;
-            if (actionName == "LoanAction" && actor != null)
-            {
-                ChessPiece changedPiece = FindSupportChangedPiece(before);
-                resultTarget = changedPiece;
-                supportDelta = changedPiece != null ? changedPiece.support - before.pieceSupports[changedPiece] : 0;
-            }
-
-            ActionResultContext context = new ActionResultContext
-            {
-                actionName = actionName,
-                targetName = resultTarget != null ? GetPieceShortName(resultTarget) : "대상",
-                inputValue = inputValue,
-                supportDelta = supportDelta,
-                goldDelta = actor != null ? actor.gold - before.gold : 0,
-                goldPerTurnDelta = actor != null ? actor.goldPerTurn - before.goldPerTurn : 0,
-                taxModifierBefore = before.targetTaxModifier,
-                taxModifierAfter = resultTarget != null ? resultTarget.taxModifier : before.targetTaxModifier,
-                targetFile = resultTarget != null ? resultTarget.file : -1,
-                targetRank = resultTarget != null ? resultTarget.rank : -1
-            };
-
-            return ActionResultText.Resolve(actionName, context);
-        }
-
-        private ChessPiece FindSupportChangedPiece(FiscalResultSnapshot before)
-        {
-            foreach (KeyValuePair<ChessPiece, int> pair in before.pieceSupports)
-            {
-                if (pair.Key != null && pair.Key.support != pair.Value)
-                {
-                    return pair.Key;
-                }
-            }
-
-            return null;
-        }
-
-        private string GetPieceShortName(ChessPiece piece)
-        {
-            if (piece == null)
-            {
-                return "기물";
-            }
-
-            return GetColorName(piece.color) + GetSideName(piece.side) + GetTypeName(piece.type);
-        }
-
-        private string GetColorName(PieceColor color)
-        {
-            return color == PieceColor.Black ? "흑" : "백";
-        }
-
-        private string GetSideName(PieceSide side)
-        {
-            if (side == PieceSide.Kingside)
-            {
-                return "K";
-            }
-
-            if (side == PieceSide.Queenside)
-            {
-                return "Q";
-            }
-
-            return string.Empty;
-        }
-
-        private string GetTypeName(PieceType type)
-        {
-            switch (type)
-            {
-                case PieceType.Pawn: return "폰";
-                case PieceType.Rook: return "룩";
-                case PieceType.Knight: return "나이트";
-                case PieceType.Bishop: return "비숍";
-                case PieceType.Queen: return "퀸";
-                case PieceType.King: return "킹";
-                case PieceType.Barricade: return "바리케이드";
-                case PieceType.Trebuchet: return "트레뷰셋";
-                default: return type.ToString();
-            }
-        }
-
-        private struct FiscalResultSnapshot
-        {
-            public int gold;
-            public int goldPerTurn;
-            public ChessPiece target;
-            public int targetSupport;
-            public int targetTaxModifier;
-            public bool targetIsOffBoard;
-            public Dictionary<ChessPiece, int> pieceSupports;
         }
     }
 }

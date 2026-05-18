@@ -115,15 +115,7 @@ namespace MMBGame
 
         private void EnsureVisuals()
         {
-            if (pieceVisuals == null)
-            {
-                pieceVisuals = FindObjectOfType<BoardPieceVisuals>();
-            }
-
-            if (pieceVisuals == null)
-            {
-                pieceVisuals = gameObject.AddComponent<BoardPieceVisuals>();
-            }
+            pieceVisuals = SceneComponentResolver.ResolveOrAdd(pieceVisuals, gameObject);
         }
 
         [ContextMenu("Fill Default Piece Definitions")]

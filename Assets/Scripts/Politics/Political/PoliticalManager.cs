@@ -19,8 +19,8 @@ namespace MMBGame
 
         public void Initialize()
         {
-            boardManager = FindObjectOfType<BoardManager>();
-            politicsManager = FindObjectOfType<PoliticsManager>();
+            boardManager = SceneComponentResolver.Resolve<BoardManager>();
+            politicsManager = SceneComponentResolver.Resolve<PoliticsManager>();
             lastActions.Clear();
             recentActions.Clear();
             isolationUsedColors.Clear();

@@ -47,7 +47,7 @@ namespace MMBGame
             onSelected = onPieceSelected;
 
             List<ChessPiece> pieces = CollectOffBoard(color, boardState);
-            Vector3 center = ScreenCenter();
+            Vector3 center = RuntimeUiFactory.GetScreenCenter();
 
             int cols = Mathf.Max(1, Mathf.Min(pieces.Count, MAX_PER_ROW));
             int rows = Mathf.Max(1, Mathf.CeilToInt(pieces.Count / (float)MAX_PER_ROW));
@@ -124,18 +124,6 @@ namespace MMBGame
             return result;
         }
 
-        private Vector3 ScreenCenter()
-        {
-            if (Camera.main == null)
-            {
-                return Vector3.zero;
-            }
-
-            return Camera.main.ScreenToWorldPoint(new Vector3(
-                Screen.width * 0.5f, Screen.height * 0.5f,
-                -Camera.main.transform.position.z));
-        }
-
         private void CreateBackground(Vector3 center, float w, float h)
         {
             GameObject bg = new GameObject("FrontDeployBG");
@@ -143,7 +131,7 @@ namespace MMBGame
             bg.transform.localScale = new Vector3(w, h, 1f);
 
             SpriteRenderer sr = bg.AddComponent<SpriteRenderer>();
-            sr.sprite = MakePixelSprite();
+            sr.sprite = RuntimeUiFactory.GetPixelSprite();
             sr.color = new Color(0.18f, 0.18f, 0.18f, 0.92f);
             sr.sortingOrder = SORT_BG;
 
@@ -199,7 +187,7 @@ namespace MMBGame
             }
             else
             {
-                sr.sprite = MakePixelSprite();
+                sr.sprite = RuntimeUiFactory.GetPixelSprite();
                 sr.color = piece.color == PieceColor.White
                     ? new Color(0.92f, 0.88f, 0.75f)
                     : new Color(0.28f, 0.22f, 0.18f);
@@ -232,53 +220,13 @@ namespace MMBGame
 
         private void CreateLabel(string text, Vector3 pos, int sortOrder, float charSize = 0.15f)
         {
-            GameObject obj = new GameObject("Label");
-            obj.transform.position = pos;
-
-            TextMesh tm = obj.AddComponent<TextMesh>();
-            tm.text = text;
-            tm.anchor = TextAnchor.MiddleCenter;
-            tm.alignment = TextAlignment.Center;
-            tm.fontSize = 36;
-            tm.characterSize = charSize;
-            tm.color = Color.white;
-            TextMeshFontApplier.Apply(tm);
-
-            MeshRenderer mr = obj.GetComponent<MeshRenderer>();
-            if (mr != null)
-            {
-                mr.sortingOrder = sortOrder;
-            }
-
-            objects.Add(obj);
+            RuntimeUiFactory.CreateLabel("Label", text, pos, sortOrder, charSize, objects);
         }
 
-        private Sprite MakePixelSprite()
-        {
-            Texture2D tex = new Texture2D(1, 1);
-            tex.SetPixel(0, 0, Color.white);
-            tex.Apply();
-            // pixelsPerUnit=1 so sprite is 1 world unit — scale handles actual size
-            return Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1f);
-        }
 
         private string GetPieceName(ChessPiece piece)
         {
-            return (piece.color == PieceColor.White ? "백" : "흑") + " " + GetTypeName(piece.type);
-        }
-
-        private string GetTypeName(PieceType type)
-        {
-            switch (type)
-            {
-                case PieceType.Pawn: return "폰";
-                case PieceType.Rook: return "룩";
-                case PieceType.Knight: return "나이트";
-                case PieceType.Bishop: return "비숍";
-                case PieceType.Queen: return "퀸";
-                case PieceType.King: return "킹";
-                default: return type.ToString();
-            }
+            return PieceDisplayNames.GetSimpleName(piece);
         }
     }
 }

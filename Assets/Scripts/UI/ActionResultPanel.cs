@@ -42,7 +42,7 @@ namespace MMBGame
             IsOpen = true;
             onConfirm = confirmCallback;
 
-            Vector3 center = ScreenCenter();
+            Vector3 center = RuntimeUiFactory.GetScreenCenter();
             CreateRoot(center);
             CreateBackdrop(center);
             CreateBackground(center);
@@ -102,10 +102,10 @@ namespace MMBGame
             GameObject backdropObject = new GameObject("ActionResultBackdrop");
             backdropObject.transform.SetParent(panelRoot.transform, true);
             backdropObject.transform.position = new Vector3(center.x, center.y, center.z - 0.15f);
-            backdropObject.transform.localScale = GetScreenWorldSize();
+            backdropObject.transform.localScale = RuntimeUiFactory.GetScreenWorldSize(new Vector3(20f, 12f, 1f));
 
             SpriteRenderer renderer = backdropObject.AddComponent<SpriteRenderer>();
-            renderer.sprite = MakePixelSprite();
+            renderer.sprite = RuntimeUiFactory.GetPixelSprite();
             renderer.color = new Color(0f, 0f, 0f, 0.86f);
             renderer.sortingOrder = SORT_BACKDROP;
             objects.Add(backdropObject);
@@ -118,7 +118,7 @@ namespace MMBGame
             backgroundObject.transform.position = new Vector3(center.x, center.y, center.z - 0.2f);
             backgroundObject.transform.localScale = new Vector3(PANEL_W, PANEL_H, 1f);
             SpriteRenderer renderer = backgroundObject.AddComponent<SpriteRenderer>();
-            renderer.sprite = MakePixelSprite();
+            renderer.sprite = RuntimeUiFactory.GetPixelSprite();
             renderer.color = new Color(0.12f, 0.09f, 0.07f, 0.95f);
             renderer.sortingOrder = SORT_BG;
             objects.Add(backgroundObject);
@@ -132,7 +132,7 @@ namespace MMBGame
             buttonObject.transform.localScale = new Vector3(BUTTON_W, BUTTON_H, 1f);
 
             SpriteRenderer renderer = buttonObject.AddComponent<SpriteRenderer>();
-            renderer.sprite = MakePixelSprite();
+            renderer.sprite = RuntimeUiFactory.GetPixelSprite();
             renderer.color = new Color(0.28f, 0.36f, 0.32f, 1f);
             renderer.sortingOrder = SORT_BUTTON;
 
@@ -145,27 +145,7 @@ namespace MMBGame
 
         private void CreateLabel(string text, Vector3 position, int sortOrder, float characterSize)
         {
-            GameObject labelObject = new GameObject("ActionResultLabel");
-            labelObject.transform.SetParent(panelRoot.transform, true);
-            labelObject.transform.position = position;
-
-            TextMesh textMesh = labelObject.AddComponent<TextMesh>();
-            textMesh.text = text;
-            textMesh.anchor = TextAnchor.MiddleCenter;
-            textMesh.alignment = TextAlignment.Center;
-            textMesh.fontSize = 38;
-            textMesh.characterSize = characterSize;
-            textMesh.lineSpacing = 1f;
-            textMesh.color = Color.white;
-            TextMeshFontApplier.Apply(textMesh);
-
-            MeshRenderer renderer = labelObject.GetComponent<MeshRenderer>();
-            if (renderer != null)
-            {
-                renderer.sortingOrder = sortOrder;
-            }
-
-            objects.Add(labelObject);
+            RuntimeUiFactory.CreateLabel("ActionResultLabel", text, position, sortOrder, characterSize, objects, panelRoot.transform, 38);
         }
 
         private void DestroyExistingPanelObjects()
@@ -190,35 +170,6 @@ namespace MMBGame
             }
         }
 
-        private Vector3 ScreenCenter()
-        {
-            if (Camera.main == null)
-            {
-                return Vector3.zero;
-            }
-
-            return Camera.main.ScreenToWorldPoint(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, -Camera.main.transform.position.z));
-        }
-
-        private Vector3 GetScreenWorldSize()
-        {
-            if (Camera.main == null)
-            {
-                return new Vector3(20f, 12f, 1f);
-            }
-
-            Vector3 min = Camera.main.ScreenToWorldPoint(new Vector3(0f, 0f, -Camera.main.transform.position.z));
-            Vector3 max = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, -Camera.main.transform.position.z));
-            return new Vector3(Mathf.Abs(max.x - min.x), Mathf.Abs(max.y - min.y), 1f);
-        }
-
-        private Sprite MakePixelSprite()
-        {
-            Texture2D texture = new Texture2D(1, 1);
-            texture.SetPixel(0, 0, Color.white);
-            texture.Apply();
-            return Sprite.Create(texture, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1f);
-        }
     }
 }
 

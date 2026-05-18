@@ -67,7 +67,10 @@ namespace MMBGame.AI
             float myVal = 0f, enemyVal = 0f;
             foreach (var p in state.GetAllPieces())
             {
-                if (p.type == PieceType.Barricade || p.type == PieceType.Trebuchet) continue;
+                if (PieceClassifier.IsObstacle(p))
+                {
+                    continue;
+                }
                 if (p.color == aiSide)  myVal    += AIContext.PieceValue(p.type);
                 else if (p.color == enemy) enemyVal += AIContext.PieceValue(p.type);
             }

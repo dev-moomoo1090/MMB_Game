@@ -43,7 +43,7 @@ namespace MMBGame
                 return;
             }
 
-            CommandActionInputPrompt existing = FindFirstObjectByType<CommandActionInputPrompt>();
+            CommandActionInputPrompt existing = SceneComponentResolver.Resolve<CommandActionInputPrompt>();
             if (existing != null)
             {
                 instance = existing;
@@ -172,7 +172,7 @@ namespace MMBGame
             GameObject backgroundObject = new GameObject("Background");
             backgroundObject.transform.SetParent(root.transform, false);
             background = backgroundObject.AddComponent<SpriteRenderer>();
-            background.sprite = CreateBackgroundSprite();
+            background.sprite = RuntimeUiFactory.GetPixelSprite();
             background.color = new Color(0.08f, 0.08f, 0.08f, 0.82f);
             background.sortingOrder = BACKGROUND_SORTING_ORDER;
             backgroundObject.transform.localScale = new Vector3(backgroundSize.x, backgroundSize.y, 1f);
@@ -194,12 +194,5 @@ namespace MMBGame
             }
         }
 
-        private Sprite CreateBackgroundSprite()
-        {
-            Texture2D texture = new Texture2D(1, 1);
-            texture.SetPixel(0, 0, Color.white);
-            texture.Apply();
-            return Sprite.Create(texture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
-        }
     }
 }

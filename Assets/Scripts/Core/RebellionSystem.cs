@@ -8,7 +8,7 @@ namespace MMBGame
 
         public void Initialize()
         {
-            boardManager = FindObjectOfType<BoardManager>();
+            boardManager = SceneComponentResolver.Resolve<BoardManager>();
             EventBus.Instance.OnPhaseChanged -= HandlePhaseChanged;
             EventBus.Instance.OnPhaseChanged += HandlePhaseChanged;
             EventBus.Instance.OnSupportChanged -= HandleSupportChanged;

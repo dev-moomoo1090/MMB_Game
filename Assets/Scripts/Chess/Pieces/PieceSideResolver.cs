@@ -4,7 +4,7 @@ namespace MMBGame
     {
         public static PieceSide Resolve(PieceType type, int rank)
         {
-            if (type == PieceType.King || type == PieceType.Queen || type == PieceType.Barricade || type == PieceType.Trebuchet)
+            if (type == PieceType.King || type == PieceType.Queen || PieceClassifier.IsObstacle(type))
             {
                 return PieceSide.None;
             }
@@ -14,7 +14,7 @@ namespace MMBGame
 
         public static PieceLane ResolveLane(PieceType type, int rank)
         {
-            if (type == PieceType.Barricade || type == PieceType.Trebuchet || rank < 0 || rank > 7)
+            if (PieceClassifier.IsObstacle(type) || rank < 0 || rank > 7)
             {
                 return PieceLane.None;
             }

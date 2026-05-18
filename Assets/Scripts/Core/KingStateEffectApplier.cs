@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace MMBGame
 {
-    public class KingStateEffectApplier : MonoBehaviour
+    public partial class KingStateEffectApplier : MonoBehaviour
     {
         private const int INCOMPETENT_SURVIVAL_TURNS = 20;
         private const float INCOMPETENT_INITIAL_TAX_RATE = 0.7f;
@@ -47,8 +47,8 @@ namespace MMBGame
         public void Initialize()
         {
             instance = this;
-            boardManager = FindObjectOfType<BoardManager>();
-            politicsManager = FindObjectOfType<PoliticsManager>();
+            boardManager = SceneComponentResolver.Resolve<BoardManager>();
+            politicsManager = SceneComponentResolver.Resolve<PoliticsManager>();
             incompetentTurnCounts[PieceColor.White] = 0;
             incompetentTurnCounts[PieceColor.Black] = 0;
             incompetentPenaltyAppliedColors.Clear();
@@ -128,184 +128,6 @@ namespace MMBGame
             }
 
             RemoveHonorChangeHandler(color);
-        }
-
-        private void ApplyBenevolentEffect(BoardState board, PlayerState player, PieceColor color)
-        {
-            int supportGain = Mathf.CeilToInt(player.honor / 50f);
-            if (supportGain > 0)
-            {
-                ApplyToAllPieces(board, color, piece => PoliticalStatService.ChangeSupport(piece, supportGain, "Benevolent"));
-            }
-
-            int highSupportCount = CountPieces(board, color, piece => IsPoliticalPiece(piece) && piece.support >= 51);
-            int totalPieces = CountPieces(board, color, IsPoliticalPiece);
-            if (highSupportCount <= 0 || totalPieces <= 0)
-            {
-                return;
-            }
-
-            int totalSupportScore = SumSupport(board, color);
-            int honorGain = Mathf.FloorToInt((float)totalSupportScore / highSupportCount * totalPieces);
-            if (honorGain > 0)
-            {
-                player.AddHonor(honorGain);
-            }
-        }
-
-        private void ApplyIncompetentEffect(BoardState board, PieceColor color)
-        {
-            if (!incompetentPenaltyAppliedColors.Contains(color))
-            {
-                board.globalAcceptanceWeight -= INCOMPETENT_INITIAL_ACCEPTANCE_PENALTY;
-                ApplyToAllPieces(board, color, ApplyIncompetentInitialPenalty);
-                incompetentPenaltyAppliedColors.Add(color);
-            }
-
-            board.globalAcceptanceWeight += INCOMPETENT_TURN_ACCEPTANCE_GAIN;
-            ApplyToAllPieces(board, color, ApplyIncompetentTurnGrowth);
-            incompetentTurnCounts[color]++;
-            if (incompetentTurnCounts[color] < INCOMPETENT_SURVIVAL_TURNS)
-            {
-                return;
-            }
-
-            board.globalAcceptanceWeight += INCOMPETENT_FIXED_ACCEPTANCE_GAIN;
-            ApplyToAllPieces(board, color, ApplyIncompetentFixedBonus);
-            KingStateEvaluator.FixBenevolent(color);
-            KingStateEvaluator.SetCurrentState(color, KingState.Sage);
-            incompetentTurnCounts[color] = 0;
-        }
-
-        private void ApplyIncompetentInitialPenalty(ChessPiece piece)
-        {
-            piece.taxPerTurn = Mathf.Max(1, Mathf.FloorToInt(piece.taxPerTurn * INCOMPETENT_INITIAL_TAX_RATE));
-            PoliticalStatService.ChangeSupport(piece, -INCOMPETENT_INITIAL_SUPPORT_PENALTY, "IncompetentInitial");
-        }
-
-        private void ApplyIncompetentTurnGrowth(ChessPiece piece)
-        {
-            piece.taxPerTurn = Mathf.Max(piece.taxPerTurn, Mathf.CeilToInt(piece.taxPerTurn * INCOMPETENT_TURN_TAX_RATE));
-            PoliticalStatService.ChangeSupport(piece, INCOMPETENT_TURN_SUPPORT_GAIN, "IncompetentTurn");
-        }
-
-        private void ApplyIncompetentFixedBonus(ChessPiece piece)
-        {
-            piece.taxPerTurn = Mathf.CeilToInt(piece.taxPerTurn * INCOMPETENT_FIXED_TAX_RATE);
-            PoliticalStatService.ChangeSupport(piece, INCOMPETENT_FIXED_SUPPORT_GAIN, "IncompetentFixed");
-        }
-
-        private void EnsureHonorChangeHandler(PlayerState player, PieceColor color)
-        {
-            if (honorChangeHandlers.ContainsKey(color))
-            {
-                return;
-            }
-
-            Action<int> handler = delta =>
-            {
-                if (delta >= 0 || boardManager == null || boardManager.BoardState == null)
-                {
-                    return;
-                }
-
-                if (suppressNextHonorDecreasePenaltyColors.Contains(color))
-                {
-                    suppressNextHonorDecreasePenaltyColors.Remove(color);
-                    return;
-                }
-
-                int penalty = Mathf.CeilToInt(Mathf.Abs(delta) / 2f);
-                if (penalty <= 0)
-                {
-                    return;
-                }
-
-                ApplyToAllPieces(boardManager.BoardState, color, piece => PoliticalStatService.ChangeSupport(piece, -penalty, "DictatorshipHonorPenalty"));
-            };
-
-            honorChangeHandlers[color] = handler;
-            player.OnHonorChanged += handler;
-        }
-
-        private void RemoveHonorChangeHandler(PieceColor color)
-        {
-            if (!honorChangeHandlers.TryGetValue(color, out Action<int> handler) || politicsManager == null)
-            {
-                honorChangeHandlers.Remove(color);
-                return;
-            }
-
-            PlayerState player = politicsManager.GetCurrentPlayer(color);
-            if (player != null)
-            {
-                player.OnHonorChanged -= handler;
-            }
-
-            honorChangeHandlers.Remove(color);
-        }
-
-        private int CountPieces(BoardState board, PieceColor color, Func<ChessPiece, bool> predicate)
-        {
-            int count = 0;
-            List<ChessPiece> pieces = board.GetAllPieces();
-            for (int i = 0; i < pieces.Count; i++)
-            {
-                ChessPiece piece = pieces[i];
-                if (piece != null && piece.color == color && predicate(piece))
-                {
-                    count++;
-                }
-            }
-
-            return count;
-        }
-
-        private int SumSupport(BoardState board, PieceColor color)
-        {
-            int total = 0;
-            List<ChessPiece> pieces = board.GetAllPieces();
-            for (int i = 0; i < pieces.Count; i++)
-            {
-                ChessPiece piece = pieces[i];
-                if (piece != null && piece.color == color && IsPoliticalPiece(piece))
-                {
-                    total += piece.support;
-                }
-            }
-
-            return total;
-        }
-
-        private void ApplyToAllPieces(BoardState board, PieceColor color, Action<ChessPiece> effect)
-        {
-            List<ChessPiece> pieces = board.GetAllPieces();
-            for (int i = 0; i < pieces.Count; i++)
-            {
-                ChessPiece piece = pieces[i];
-                if (piece != null && piece.color == color && IsPoliticalPiece(piece))
-                {
-                    effect(piece);
-                }
-            }
-        }
-
-        private bool IsPoliticalPiece(ChessPiece piece)
-        {
-            return piece.type != PieceType.Barricade && piece.type != PieceType.Trebuchet;
-        }
-
-        private void EnsureReferences()
-        {
-            if (boardManager == null)
-            {
-                boardManager = FindObjectOfType<BoardManager>();
-            }
-
-            if (politicsManager == null)
-            {
-                politicsManager = FindObjectOfType<PoliticsManager>();
-            }
         }
     }
 }
