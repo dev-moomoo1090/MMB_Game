@@ -10,7 +10,7 @@ namespace MMBGame
 
         public override bool Execute(ChessPiece target, PieceColor actorColor, PoliticalManager manager, int value)
         {
-            if (target.color != actorColor)
+            if (target == null || target.color != actorColor)
             {
                 return false;
             }

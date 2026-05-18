@@ -58,7 +58,7 @@ namespace MMBGame
             switch (state)
             {
                 case KingState.Sage:
-                    return "성군\n정치 행동 횟수 +1\n매 턴 모든 기물 지지도 +2";
+                    return "성군\n정치 행동 스킵 시 다음 턴 횟수 +1(최대 1회)\n매 턴 모든 기물 지지도 +2";
                 case KingState.Autocrat:
                     return "독재\n명령 거부 확률 0%\n군사 행동 비용 -30%";
                 case KingState.DarkKing:

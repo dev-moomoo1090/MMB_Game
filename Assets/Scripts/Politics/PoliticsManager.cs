@@ -88,6 +88,12 @@ namespace MMBGame
                 return false;
             }
 
+            if (action.RequiresPieceSelection && target != null && target.type == PieceType.King)
+            {
+                QaLog.Write("행동", "재정 행동 실패 행동=" + actionName + " 사유=킹대상불가");
+                return false;
+            }
+
             if (target != null && target.color != currentTurnColor)
             {
                 QaLog.Write("행동", "재정 행동 실패 행동=" + actionName + " 사유=대상색상불일치 대상색상=" + target.color + " 현재색상=" + currentTurnColor);

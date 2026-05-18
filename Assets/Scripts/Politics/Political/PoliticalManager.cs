@@ -17,6 +17,11 @@ namespace MMBGame
         public int IsolationPoliticsPhasesRemaining => isolationPoliticsPhasesRemaining;
         public string LastFailureReason { get; private set; }
 
+        public void SetLastFailureReason(string reason)
+        {
+            LastFailureReason = reason;
+        }
+
         public void Initialize()
         {
             boardManager = SceneComponentResolver.Resolve<BoardManager>();
@@ -120,6 +125,12 @@ namespace MMBGame
             if (action.RequiresPieceSelection && target == null)
             {
                 QaLog.Write("행동", "정치 행동 실패 행동=" + actionName + " 사유=대상필요");
+                return false;
+            }
+
+            if (action.RequiresPieceSelection && target != null && target.type == PieceType.King)
+            {
+                QaLog.Write("행동", "정치 행동 실패 행동=" + actionName + " 사유=킹대상불가");
                 return false;
             }
 

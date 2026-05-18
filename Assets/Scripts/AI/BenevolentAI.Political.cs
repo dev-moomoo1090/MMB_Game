@@ -26,9 +26,7 @@ namespace MMBGame.AI
 
         private int GetBaseActionCount()
         {
-            int count = 2;
-            if (_ctx.IsBenevolent(_side)) count++;
-            return count;
+            return 2;
         }
 
         private ActionCandidate SelectBestAction(HashSet<string> used)

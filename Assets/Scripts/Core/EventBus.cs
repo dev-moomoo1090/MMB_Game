@@ -25,6 +25,7 @@ namespace MMBGame
         public event Action<ChessPiece> OnPieceCapturePending;
         public event Action<ChessPiece> OnMovementRefused;
         public event Action<ChessPiece> OnRebellionTriggered;
+        public event Action<ChessPiece> OnRebellionAttempt;
         public event Action<ChessPiece> OnDefectionTriggered;
         public event Action<ChessPiece, int, string> OnSupportChanged;
         public event Action<PieceColor, string> OnActionExecuted;
@@ -70,6 +71,12 @@ namespace MMBGame
         {
             QaLog.Write("이벤트", "반란 이벤트 기물=" + QaLog.PieceLabel(piece));
             OnRebellionTriggered?.Invoke(piece);
+        }
+
+        public void PublishRebellionAttempt(ChessPiece piece)
+        {
+            QaLog.Write("이벤트", "반란 시도 이벤트 기물=" + QaLog.PieceLabel(piece));
+            OnRebellionAttempt?.Invoke(piece);
         }
 
         public void PublishDefectionTriggered(ChessPiece piece)

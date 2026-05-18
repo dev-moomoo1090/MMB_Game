@@ -84,7 +84,7 @@ namespace MMBGame
                     return;
                 }
 
-                if (visual.Piece != null && visual.Piece.GetMovementControllerColor() != ResolveCurrentColor())
+                if (IsChessPhase() && visual.Piece != null && visual.Piece.GetMovementControllerColor() != ResolveCurrentColor())
                 {
                     ShowSelectedMoves();
                     ShowSelectedProfile();
@@ -228,12 +228,19 @@ namespace MMBGame
 
         private void HandlePhaseChanged(GamePhase phase)
         {
-            if (phase != GamePhase.ChessPhase && moveIndicators != null)
+            if (phase != GamePhase.ChessPhase)
             {
-                moveIndicators.Hide();
-            }
+                if (moveIndicators != null)
+                {
+                    moveIndicators.Hide();
+                }
 
-            RefreshSelectionProfile();
+                ClearSelection();
+            }
+            else
+            {
+                RefreshSelectionProfile();
+            }
         }
 
         private bool IsChessPhase()

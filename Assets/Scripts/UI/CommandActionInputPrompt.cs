@@ -21,6 +21,7 @@ namespace MMBGame
         private TextMesh label;
         private Action<int> onSubmitted;
         private string inputText = string.Empty;
+        private string currentActionName = string.Empty;
 
         public static void Show(string actionName, Action<int> submitCallback)
         {
@@ -76,6 +77,7 @@ namespace MMBGame
         {
             EnsureVisuals();
             inputText = string.Empty;
+            currentActionName = actionName ?? string.Empty;
             onSubmitted = submitCallback;
             UpdateLabel(actionName);
             root.SetActive(true);
@@ -144,7 +146,36 @@ namespace MMBGame
         private void UpdateLabel(string actionName)
         {
             string valueText = string.IsNullOrEmpty(inputText) ? "_" : inputText;
-            label.text = "입력값 : " + valueText + "\nEnter로 실행 / Esc 취소";
+            string costHint = GetCostHint(currentActionName, inputText);
+            label.text = "입력값 : " + valueText + costHint + "\nEnter로 실행 / Esc 취소";
+        }
+
+        private static string GetCostHint(string actionName, string inputText)
+        {
+            int multiplier = GetCostMultiplier(actionName);
+            if (multiplier <= 1)
+            {
+                return string.Empty;
+            }
+
+            if (int.TryParse(inputText, out int value) && value > 0)
+            {
+                return "  (비용: " + (value * multiplier) + " 골드)";
+            }
+
+            return "  (비용: 입력값 x" + multiplier + " 골드)";
+        }
+
+        private static int GetCostMultiplier(string actionName)
+        {
+            switch (actionName)
+            {
+                case "제후국":
+                case "매수":
+                    return 3;
+                default:
+                    return 1;
+            }
         }
 
         private void AnchorToCamera()

@@ -13,12 +13,15 @@ namespace MMBGame
         {
             if (target == null || target.color == actorColor)
             {
+                manager.SetLastFailureReason("적 기물을 선택해야 합니다.");
                 return false;
             }
 
             PlayerState actor = manager.GetActorState(actorColor);
-            if (actor == null || !actor.SpendGold(value * 3))
+            int cost = value * 3;
+            if (actor == null || !actor.SpendGold(cost))
             {
+                manager.SetLastFailureReason("골드 부족: " + cost + " 필요 (보유: " + (actor != null ? actor.gold : 0) + ")");
                 return false;
             }
 
@@ -33,11 +36,12 @@ namespace MMBGame
                 if (roll < chance)
                 {
                     QaLog.Write("반란", "제후국 반란 판정 성공 기물=" + QaLog.PieceLabel(target) + " 공식=(20-지지도(" + target.support + "))*1.5+보너스(" + bonus + ") 확률=" + chance + " 굴림=" + roll + " 시도=" + (i + 1));
-                    EventBus.Instance.PublishRebellionTriggered(target);
-                    return true;
+                    EventBus.Instance.PublishRebellionAttempt(target);
                 }
-
-                QaLog.Write("반란", "제후국 반란 판정 실패 기물=" + QaLog.PieceLabel(target) + " 공식=(20-지지도(" + target.support + "))*1.5+보너스(" + bonus + ") 확률=" + chance + " 굴림=" + roll + " 시도=" + (i + 1));
+                else
+                {
+                    QaLog.Write("반란", "제후국 반란 판정 실패 기물=" + QaLog.PieceLabel(target) + " 공식=(20-지지도(" + target.support + "))*1.5+보너스(" + bonus + ") 확률=" + chance + " 굴림=" + roll + " 시도=" + (i + 1));
+                }
             }
 
             return true;

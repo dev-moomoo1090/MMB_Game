@@ -11,16 +11,29 @@ namespace MMBGame
             boardManager = SceneComponentResolver.Resolve<BoardManager>();
             EventBus.Instance.OnSupportChanged -= HandleSupportChanged;
             EventBus.Instance.OnSupportChanged += HandleSupportChanged;
+            EventBus.Instance.OnRebellionAttempt -= HandleRebellionAttempt;
+            EventBus.Instance.OnRebellionAttempt += HandleRebellionAttempt;
         }
 
         private void OnDestroy()
         {
             EventBus.Instance.OnSupportChanged -= HandleSupportChanged;
+            EventBus.Instance.OnRebellionAttempt -= HandleRebellionAttempt;
+        }
+
+        private void HandleRebellionAttempt(ChessPiece piece)
+        {
+            if (boardManager == null || boardManager.BoardState == null || piece == null || piece.type == PieceType.King)
+            {
+                return;
+            }
+
+            TriggerRebellion(piece);
         }
 
         private void HandleSupportChanged(ChessPiece piece, int delta, string reason)
         {
-            if (delta >= 0 || boardManager == null || boardManager.BoardState == null || piece == null)
+            if (delta >= 0 || boardManager == null || boardManager.BoardState == null || piece == null || piece.type == PieceType.King)
             {
                 return;
             }
