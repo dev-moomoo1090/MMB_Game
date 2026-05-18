@@ -3,13 +3,14 @@ using UnityEngine;
 
 namespace MMBGame
 {
-    public class BoardManager : MonoBehaviour
+    public partial class BoardManager : MonoBehaviour
     {
         [SerializeField] private BoardPieceSetupManager pieceSetupManager;
 
         public BoardState BoardState { get; private set; }
 
         private TurnManager turnManager;
+        private readonly HashSet<string> refusedMoveKeys = new HashSet<string>();
 
         private void Awake()
         {
@@ -18,6 +19,18 @@ namespace MMBGame
             SetupInitialPosition();
             BoardState.RecordPosition();
             RefreshPieceVisuals();
+        }
+
+        private void OnEnable()
+        {
+            EventBus.Instance.OnPhaseChanged += HandlePhaseChanged;
+            EventBus.Instance.OnTurnChanged += HandleTurnChanged;
+        }
+
+        private void OnDisable()
+        {
+            EventBus.Instance.OnPhaseChanged -= HandlePhaseChanged;
+            EventBus.Instance.OnTurnChanged -= HandleTurnChanged;
         }
 
         private void SetupInitialPosition()
@@ -51,7 +64,16 @@ namespace MMBGame
 
         public List<Move> GetLegalMoves(int file, int rank)
         {
-            return MoveValidator.GetLegalMoves(BoardState, file, rank);
+            List<Move> moves = MoveValidator.GetLegalMoves(BoardState, file, rank);
+            for (int i = moves.Count - 1; i >= 0; i--)
+            {
+                if (IsMoveRefused(moves[i]))
+                {
+                    moves.RemoveAt(i);
+                }
+            }
+
+            return moves;
         }
 
         public bool TryMove(int fromFile, int fromRank, int toFile, int toRank, PieceType promotionPiece = PieceType.Queen)
@@ -63,20 +85,22 @@ namespace MMBGame
 
             ChessPiece piece = BoardState.GetPiece(fromFile, fromRank);
             if (piece == null || piece.GetMovementControllerColor() != BoardState.currentTurn) return false;
-            if (ObedienceSystem.IsRefused(piece, BoardState))
-            {
-                if (HonorPiecePassiveSystem.Instance == null || !HonorPiecePassiveSystem.Instance.TryRerollMovementRefusal(piece))
-                {
-                    EventBus.Instance.PublishMovementRefused(piece);
-                    return false;
-                }
-            }
 
             List<Move> legal = GetLegalMoves(fromFile, fromRank);
             foreach (Move lm in legal)
             {
                 if (lm.toFile != toFile || lm.toRank != toRank) continue;
                 if (lm.specialMove == SpecialMoveType.Promotion && lm.promotionPiece != promotionPiece) continue;
+                if (ObedienceSystem.IsRefused(piece, BoardState, lm.toFile, lm.toRank))
+                {
+                    if (HonorPiecePassiveSystem.Instance == null || !HonorPiecePassiveSystem.Instance.TryRerollMovementRefusal(piece, lm.toFile, lm.toRank))
+                    {
+                        MarkMoveRefused(lm, piece);
+                        EventBus.Instance.PublishMovementRefused(piece);
+                        return false;
+                    }
+                }
+
                 BoardState.capturedThisTurn.Clear();
                 ChessPiece capturedPiece = GetCapturedPiece(lm);
                 if (capturedPiece != null)
@@ -90,6 +114,7 @@ namespace MMBGame
                 piece.ClearOneTimeMovePatterns();
                 BoardState.RecordPosition();
                 HonorPiecePassiveSystem.Instance?.HandlePieceMoved(piece, BoardState);
+                refusedMoveKeys.Clear();
                 RefreshPieceVisuals();
                 AdvanceTurnAfterMove();
                 return true;
@@ -168,20 +193,9 @@ namespace MMBGame
             }
 
             BoardState.squares[file, rank].piece = piece;
-            int previousFile = piece.file;
-            int previousRank = piece.rank;
             piece.file = file;
             piece.rank = rank;
             piece.isOffBoard = false;
-
-            if (CheckDetector.IsInCheck(BoardState, piece.color))
-            {
-                BoardState.squares[file, rank].piece = null;
-                piece.file = previousFile;
-                piece.rank = previousRank;
-                piece.isOffBoard = true;
-                return false;
-            }
 
             BoardState.offBoardPieces.Remove(piece);
             RefreshPieceVisuals();
@@ -200,16 +214,37 @@ namespace MMBGame
 
         public GameResult CheckGameResult()
         {
+            if (TryGetKingCaptureWinner(out PieceColor winner))
+            {
+                return GameResult.Checkmate;
+            }
+
             PieceColor turn = BoardState.currentTurn;
             bool inCheck = CheckDetector.IsInCheck(BoardState, turn);
             bool hasLegal = MoveValidator.GetAllLegalMoves(BoardState, turn).Count > 0;
 
-            if (inCheck && !hasLegal) return GameResult.Checkmate;
-            if (!inCheck && !hasLegal) return GameResult.Stalemate;
+            if (!hasLegal) return GameResult.Stalemate;
             if (DrawDetector.IsThreefoldRepetition(BoardState)) return GameResult.Draw;
             if (DrawDetector.IsInsufficientMaterial(BoardState)) return GameResult.Draw;
             if (inCheck) return GameResult.Check;
             return GameResult.InProgress;
+        }
+
+        public bool TryEndGameByKingCapture(PieceColor fallbackWinner)
+        {
+            PieceColor winner = fallbackWinner;
+            if (TryGetKingCaptureWinner(out PieceColor resolvedWinner))
+            {
+                winner = resolvedWinner;
+            }
+
+            if (winner == PieceColor.None)
+            {
+                return false;
+            }
+
+            EventBus.Instance.PublishGameEnded(winner);
+            return true;
         }
 
         public void RefreshPieceVisuals()
@@ -232,6 +267,13 @@ namespace MMBGame
         {
             turnManager = SceneComponentResolver.Resolve(turnManager);
 
+            if (WasKingCaptured())
+            {
+                PieceColor winner = turnManager != null ? turnManager.CurrentColor : GetOpponent(BoardState.currentTurn);
+                TryEndGameByKingCapture(winner);
+                return;
+            }
+
             if (BoardState.capturedThisTurn.Count > 0)
             {
                 PieceColor attacker = turnManager != null ? turnManager.CurrentColor : PieceColor.White;
@@ -250,5 +292,6 @@ namespace MMBGame
 
             return turnManager == null || turnManager.CurrentPhase == GamePhase.ChessPhase;
         }
+
     }
 }

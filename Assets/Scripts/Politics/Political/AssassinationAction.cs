@@ -10,7 +10,7 @@ namespace MMBGame
 
         public override bool Execute(ChessPiece target, PieceColor actorColor, PoliticalManager manager, int value)
         {
-            if (target == null)
+            if (target == null || manager == null || manager.BoardManager == null)
             {
                 return false;
             }
@@ -49,6 +49,11 @@ namespace MMBGame
                         state.squares[target.file, target.rank].piece = null;
                         target.ClearOneTimeMovePatterns();
                         EventBus.Instance.PublishPieceCapturePending(target);
+                        if (target.type == PieceType.King)
+                        {
+                            manager.BoardManager.TryEndGameByKingCapture(actorColor);
+                        }
+
                         return true;
                     }
                 }

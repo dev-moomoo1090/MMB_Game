@@ -12,27 +12,24 @@ namespace MMBGame
         [SerializeField] private float depthFromCamera = 10f;
         [SerializeField] private Vector2 buttonSize = new Vector2(1.05f, 0.34f);
         [SerializeField] private float characterSize = 0.055f;
-
         private TurnManager turnManager;
         private PoliticalManager politicalManager;
         private GameObject root;
         private RegimeButton skipButton;
         private RegimeButton isolationButton;
-
         public void Initialize()
         {
             turnManager = SceneComponentResolver.Resolve<TurnManager>();
             politicalManager = SceneComponentResolver.Resolve<PoliticalManager>();
             EnsureVisuals();
         }
-
         private void Awake()
         {
             EnsureVisuals();
         }
-
         private void Update()
         {
+            EnsureVisuals();
             EnsureManagers();
             AnchorToCamera();
             UpdateAvailability();
@@ -54,7 +51,7 @@ namespace MMBGame
 
         private void HandleInput()
         {
-            if (ActionResultPanel.IsOpen || Mouse.current == null || Camera.main == null)
+            if (skipButton == null || isolationButton == null || ActionResultPanel.IsOpen || Mouse.current == null || Camera.main == null)
             {
                 return;
             }
@@ -84,7 +81,7 @@ namespace MMBGame
             PieceColor color = ResolveCurrentColor();
             if (turnManager == null || turnManager.CurrentPhase != GamePhase.PoliticsPhase)
             {
-                ShowNotice("정치 턴에서만 사용할 수 있습니다.");
+                ShowNotice("정치 턴에만 사용할 수 있습니다.");
                 return;
             }
 
@@ -109,7 +106,7 @@ namespace MMBGame
             PieceColor color = ResolveCurrentColor();
             if (turnManager == null || turnManager.CurrentPhase != GamePhase.PoliticsPhase)
             {
-                ShowNotice("정치 턴에서만 사용할 수 있습니다.");
+                ShowNotice("정치 턴에만 사용할 수 있습니다.");
                 return;
             }
 
@@ -131,7 +128,7 @@ namespace MMBGame
                 return;
             }
 
-            ActionResultPanel.Show("행동 결과", "쇄국을 선포했습니다.\n3턴 동안 양 플레이어는 상대에게 영향을 주는 정치행동을 사용할 수 없습니다.", AdvanceTurn);
+            ActionResultPanel.Show("행동 결과", "쇄국을 선포했습니다.\n3턴 동안 두 플레이어가 상대에게 영향을 주는 정치행동을 사용할 수 없습니다.", AdvanceTurn);
         }
 
         private void ShowNotice(string text)
@@ -151,6 +148,11 @@ namespace MMBGame
 
         private void UpdateAvailability()
         {
+            if (skipButton == null || isolationButton == null)
+            {
+                return;
+            }
+
             PieceColor color = ResolveCurrentColor();
             bool isPoliticsPhase = turnManager == null || turnManager.CurrentPhase == GamePhase.PoliticsPhase;
             bool canSkip = isPoliticsPhase && turnManager != null && turnManager.CanQueuePoliticsSkipBonus(color);
@@ -172,15 +174,26 @@ namespace MMBGame
 
         private void EnsureVisuals()
         {
-            if (root != null)
+            if (root != null && skipButton != null && isolationButton != null)
             {
                 return;
             }
 
-            root = new GameObject("RegimeActionButtonsRoot");
-            root.transform.SetParent(transform, false);
-            skipButton = CreateButton("SkipPoliticsButton", "스킵", new Vector3(-0.58f, 0f, 0f));
-            isolationButton = CreateButton("IsolationButton", "쇄국", new Vector3(0.58f, 0f, 0f));
+            if (root == null)
+            {
+                root = new GameObject("RegimeActionButtonsRoot");
+                root.transform.SetParent(transform, false);
+            }
+
+            if (skipButton == null)
+            {
+                skipButton = CreateButton("SkipPoliticsButton", "스킵", new Vector3(-0.58f, 0f, 0f));
+            }
+
+            if (isolationButton == null)
+            {
+                isolationButton = CreateButton("IsolationButton", "쇄국", new Vector3(0.58f, 0f, 0f));
+            }
         }
 
         private RegimeButton CreateButton(string objectName, string labelText, Vector3 localPosition)
@@ -280,7 +293,6 @@ namespace MMBGame
             }
         }
     }
-
     public class RegimeActionButtonHitbox : MonoBehaviour
     {
     }

@@ -13,7 +13,9 @@ namespace MMBGame
                 return false;
             }
 
+            int beforeTaxModifier = targetPiece.taxModifier;
             targetPiece.taxModifier = 2;
+            QaLog.Write("세금", "세금 배율 변경 행동=" + ActionName + " 기물=" + QaLog.PieceLabel(targetPiece) + " 이전=" + beforeTaxModifier + " 이후=" + targetPiece.taxModifier);
             PoliticalStatService.ChangeSupport(targetPiece, -5, ActionName);
             return true;
         }
@@ -32,7 +34,9 @@ namespace MMBGame
                 return false;
             }
 
+            int beforeTaxModifier = targetPiece.taxModifier;
             targetPiece.taxModifier = 0;
+            QaLog.Write("세금", "세금 배율 변경 행동=" + ActionName + " 기물=" + QaLog.PieceLabel(targetPiece) + " 이전=" + beforeTaxModifier + " 이후=" + targetPiece.taxModifier);
             PoliticalStatService.ChangeSupport(targetPiece, 5, ActionName);
             return true;
         }

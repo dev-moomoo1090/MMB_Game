@@ -77,9 +77,19 @@ namespace MMBGame
             selectedTargetFile = visual.File;
             selectedTargetRank = visual.Rank;
 
-            if (selectedVisual != null && TryMoveSelectedTo(visual.File, visual.Rank))
+            if (selectedVisual != null)
             {
-                return;
+                if (TryMoveSelectedTo(visual.File, visual.Rank))
+                {
+                    return;
+                }
+
+                if (visual.Piece != null && visual.Piece.GetMovementControllerColor() != ResolveCurrentColor())
+                {
+                    ShowSelectedMoves();
+                    ShowSelectedProfile();
+                    return;
+                }
             }
 
             selectedVisual = visual;
@@ -146,6 +156,8 @@ namespace MMBGame
 
             if (boardManager == null || !boardManager.TryMove(selectedVisual.File, selectedVisual.Rank, file, rank))
             {
+                ShowSelectedMoves();
+                ShowSelectedProfile();
                 return false;
             }
 
@@ -229,6 +241,12 @@ namespace MMBGame
             turnManager = SceneComponentResolver.Resolve(turnManager);
 
             return turnManager != null && turnManager.CurrentPhase == GamePhase.ChessPhase;
+        }
+
+        private PieceColor ResolveCurrentColor()
+        {
+            turnManager = SceneComponentResolver.Resolve(turnManager);
+            return turnManager != null ? turnManager.CurrentColor : PieceColor.None;
         }
 
         private void EnsureMoveIndicators()

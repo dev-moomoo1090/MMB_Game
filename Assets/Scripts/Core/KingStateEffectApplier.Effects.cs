@@ -31,12 +31,16 @@ namespace MMBGame
         {
             if (!incompetentPenaltyAppliedColors.Contains(color))
             {
+                int beforeGlobalAcceptance = board.globalAcceptanceWeight;
                 board.globalAcceptanceWeight -= INCOMPETENT_INITIAL_ACCEPTANCE_PENALTY;
+                QaLog.Write("전역가중치", "수락 가중치 변경 사유=IncompetentInitial 색상=" + color + " 변화량=" + (-INCOMPETENT_INITIAL_ACCEPTANCE_PENALTY) + " 이전=" + beforeGlobalAcceptance + " 이후=" + board.globalAcceptanceWeight);
                 ApplyToAllPieces(board, color, ApplyIncompetentInitialPenalty);
                 incompetentPenaltyAppliedColors.Add(color);
             }
 
+            int beforeTurnGlobalAcceptance = board.globalAcceptanceWeight;
             board.globalAcceptanceWeight += INCOMPETENT_TURN_ACCEPTANCE_GAIN;
+            QaLog.Write("전역가중치", "수락 가중치 변경 사유=IncompetentTurn 색상=" + color + " 변화량=" + INCOMPETENT_TURN_ACCEPTANCE_GAIN + " 이전=" + beforeTurnGlobalAcceptance + " 이후=" + board.globalAcceptanceWeight);
             ApplyToAllPieces(board, color, ApplyIncompetentTurnGrowth);
             incompetentTurnCounts[color]++;
             if (incompetentTurnCounts[color] < INCOMPETENT_SURVIVAL_TURNS)
@@ -44,7 +48,9 @@ namespace MMBGame
                 return;
             }
 
+            int beforeFixedGlobalAcceptance = board.globalAcceptanceWeight;
             board.globalAcceptanceWeight += INCOMPETENT_FIXED_ACCEPTANCE_GAIN;
+            QaLog.Write("전역가중치", "수락 가중치 변경 사유=IncompetentFixed 색상=" + color + " 변화량=" + INCOMPETENT_FIXED_ACCEPTANCE_GAIN + " 이전=" + beforeFixedGlobalAcceptance + " 이후=" + board.globalAcceptanceWeight);
             ApplyToAllPieces(board, color, ApplyIncompetentFixedBonus);
             KingStateEvaluator.FixBenevolent(color);
             KingStateEvaluator.SetCurrentState(color, KingState.Sage);
@@ -53,19 +59,25 @@ namespace MMBGame
 
         private void ApplyIncompetentInitialPenalty(ChessPiece piece)
         {
+            int beforeTax = piece.taxPerTurn;
             piece.taxPerTurn = Mathf.Max(1, Mathf.FloorToInt(piece.taxPerTurn * INCOMPETENT_INITIAL_TAX_RATE));
+            QaLog.Write("세금", "변경 사유=IncompetentInitial 기물=" + QaLog.PieceLabel(piece) + " 이전=" + beforeTax + " 이후=" + piece.taxPerTurn);
             PoliticalStatService.ChangeSupport(piece, -INCOMPETENT_INITIAL_SUPPORT_PENALTY, "IncompetentInitial");
         }
 
         private void ApplyIncompetentTurnGrowth(ChessPiece piece)
         {
+            int beforeTax = piece.taxPerTurn;
             piece.taxPerTurn = Mathf.Max(piece.taxPerTurn, Mathf.CeilToInt(piece.taxPerTurn * INCOMPETENT_TURN_TAX_RATE));
+            QaLog.Write("세금", "변경 사유=IncompetentTurn 기물=" + QaLog.PieceLabel(piece) + " 이전=" + beforeTax + " 이후=" + piece.taxPerTurn);
             PoliticalStatService.ChangeSupport(piece, INCOMPETENT_TURN_SUPPORT_GAIN, "IncompetentTurn");
         }
 
         private void ApplyIncompetentFixedBonus(ChessPiece piece)
         {
+            int beforeTax = piece.taxPerTurn;
             piece.taxPerTurn = Mathf.CeilToInt(piece.taxPerTurn * INCOMPETENT_FIXED_TAX_RATE);
+            QaLog.Write("세금", "변경 사유=IncompetentFixed 기물=" + QaLog.PieceLabel(piece) + " 이전=" + beforeTax + " 이후=" + piece.taxPerTurn);
             PoliticalStatService.ChangeSupport(piece, INCOMPETENT_FIXED_SUPPORT_GAIN, "IncompetentFixed");
         }
     }

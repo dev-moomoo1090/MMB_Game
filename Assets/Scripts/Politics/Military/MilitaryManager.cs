@@ -61,6 +61,7 @@ namespace MMBGame
 
         public bool ExecuteMilitaryAction(string actionName, ChessPiece target, int file, int rank, PieceColor actorColor)
         {
+            QaLog.Write("행동", "군사 행동 시도 행동=" + actionName + " 색상=" + actorColor + " 대상=" + QaLog.PieceLabel(target) + " 위치=(" + file + "," + rank + ")");
             MilitaryAction action = null;
             for (int i = 0; i < militaryActions.Count; i++)
             {
@@ -73,21 +74,25 @@ namespace MMBGame
 
             if (action == null)
             {
+                QaLog.Write("행동", "군사 행동 실패 행동=" + actionName + " 사유=행동없음");
                 return false;
             }
 
             if (action.RequiresPieceSelection && target == null)
             {
+                QaLog.Write("행동", "군사 행동 실패 행동=" + actionName + " 사유=대상필요");
                 return false;
             }
 
             if (action.RequiresPositionSelection && (file < 0 || file > 7 || rank < 0 || rank > 7))
             {
+                QaLog.Write("행동", "군사 행동 실패 행동=" + actionName + " 사유=위치필요또는범위밖 위치=(" + file + "," + rank + ")");
                 return false;
             }
 
             if (target != null && target.color != actorColor)
             {
+                QaLog.Write("행동", "군사 행동 실패 행동=" + actionName + " 사유=대상색상불일치 대상색상=" + target.color + " 행동자색상=" + actorColor);
                 return false;
             }
 
@@ -95,6 +100,10 @@ namespace MMBGame
             if (result)
             {
                 EventBus.Instance.PublishActionExecuted(actorColor, actionName);
+            }
+            else
+            {
+                QaLog.Write("행동", "군사 행동 실패 행동=" + actionName + " 사유=실행결과실패");
             }
 
             return result;

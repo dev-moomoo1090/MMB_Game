@@ -9,26 +9,13 @@ namespace MMBGame
         public void Initialize()
         {
             boardManager = SceneComponentResolver.Resolve<BoardManager>();
-            EventBus.Instance.OnPhaseChanged -= HandlePhaseChanged;
-            EventBus.Instance.OnPhaseChanged += HandlePhaseChanged;
             EventBus.Instance.OnSupportChanged -= HandleSupportChanged;
             EventBus.Instance.OnSupportChanged += HandleSupportChanged;
         }
 
         private void OnDestroy()
         {
-            EventBus.Instance.OnPhaseChanged -= HandlePhaseChanged;
             EventBus.Instance.OnSupportChanged -= HandleSupportChanged;
-        }
-
-        private void HandlePhaseChanged(GamePhase phase)
-        {
-            if (phase != GamePhase.ChessPhase)
-            {
-                return;
-            }
-
-            CheckAllPieces();
         }
 
         private void HandleSupportChanged(ChessPiece piece, int delta, string reason)
@@ -38,93 +25,116 @@ namespace MMBGame
                 return;
             }
 
+            QaLog.Write("반란", "지지도 하락으로 반란 판정 시작 사유=" + reason + " 변화량=" + delta + " 기물=" + QaLog.PieceLabel(piece));
             RollImmediateRebellion(piece);
-        }
-
-        private void CheckAllPieces()
-        {
-            if (boardManager == null || boardManager.BoardState == null)
-            {
-                return;
-            }
-
-            BoardState state = boardManager.BoardState;
-            PieceColor currentTurn = state.currentTurn;
-
-            System.Collections.Generic.List<ChessPiece> pieces = state.GetAllPieces();
-            for (int i = 0; i < pieces.Count; i++)
-            {
-                ChessPiece piece = pieces[i];
-                if (piece == null || piece.color != currentTurn)
-                {
-                    continue;
-                }
-
-                CheckRebellion(piece);
-            }
-        }
-
-        private void CheckRebellion(ChessPiece piece)
-        {
-            BoardState state = boardManager.BoardState;
-            float defectionChance = GetDefectionChance(piece, state);
-
-            if (defectionChance > 0f)
-            {
-                float roll = Random.Range(0f, 100f);
-                if (roll < defectionChance)
-                {
-                    piece.color = piece.color == PieceColor.White ? PieceColor.Black : PieceColor.White;
-                    piece.side = PieceSideResolver.Resolve(piece.type, piece.rank);
-                    piece.movementControllerColor = piece.color;
-                    piece.isBetrayed = true;
-                    boardManager.RefreshPieceVisuals();
-                    EventBus.Instance.PublishDefectionTriggered(piece);
-                    return;
-                }
-            }
-
-            float rebellionChance = GetRebellionChance(piece, state);
-
-            if (rebellionChance <= 0f)
-            {
-                return;
-            }
-
-            float rebellionRoll = Random.Range(0f, 100f);
-            if (rebellionRoll < rebellionChance)
-            {
-                TriggerRebellion(piece);
-            }
         }
 
         private void RollImmediateRebellion(ChessPiece piece)
         {
             float rebellionChance = GetRebellionChance(piece, boardManager.BoardState);
-            if (rebellionChance <= 0f || Random.Range(0f, 100f) >= rebellionChance)
+            int globalWeight = boardManager.BoardState != null ? boardManager.BoardState.globalRebellionWeight : 0;
+            float tyrantModifier = KingStateEvaluator.IsTyrant(piece.color) ? 30f : 0f;
+            float roll = Random.Range(0f, 100f);
+            if (rebellionChance <= 0f)
             {
+                QaLog.Write("반란", "확률 없음 기물=" + QaLog.PieceLabel(piece) + " 공식=20-지지도(" + piece.support + ")+전역(" + globalWeight + ")+개별가중치(" + piece.rebellionWeight + ")+폭군보정(" + tyrantModifier + ") 확률=" + rebellionChance + " 누적=" + piece.rebellionSuccessCount + "/3");
                 return;
             }
 
+            if (roll >= rebellionChance)
+            {
+                QaLog.Write("반란", "판정 실패 기물=" + QaLog.PieceLabel(piece) + " 공식=20-지지도(" + piece.support + ")+전역(" + globalWeight + ")+개별가중치(" + piece.rebellionWeight + ")+폭군보정(" + tyrantModifier + ") 확률=" + rebellionChance + " 굴림=" + roll + " 누적=" + piece.rebellionSuccessCount + "/3");
+                return;
+            }
+
+            QaLog.Write("반란", "판정 성공 기물=" + QaLog.PieceLabel(piece) + " 공식=20-지지도(" + piece.support + ")+전역(" + globalWeight + ")+개별가중치(" + piece.rebellionWeight + ")+폭군보정(" + tyrantModifier + ") 확률=" + rebellionChance + " 굴림=" + roll + " 이전누적=" + piece.rebellionSuccessCount + "/3");
             TriggerRebellion(piece);
         }
 
         private void TriggerRebellion(ChessPiece piece)
         {
             piece.rebellionSuccessCount += 1;
-            if (piece.rebellionSuccessCount >= 3)
+            if (piece.rebellionSuccessCount < 3)
             {
-                piece.rebellionWeight = Mathf.Max(piece.rebellionWeight, 1f);
-                piece.movementControllerColor = piece.color == PieceColor.White ? PieceColor.Black : PieceColor.White;
+                boardManager.RefreshPieceVisuals();
+                EventBus.Instance.PublishRebellionTriggered(piece);
+                QaLog.Write("반란", "누적 기물=" + QaLog.PieceLabel(piece) + " 누적=" + piece.rebellionSuccessCount + "/3");
+                return;
             }
 
+            ResolveRebellion(piece);
+        }
+
+        private void ResolveRebellion(ChessPiece piece)
+        {
+            PieceColor previousColor = piece.color;
+            PieceColor newColor = GetOpponent(previousColor);
+            if (newColor == PieceColor.None)
+            {
+                return;
+            }
+
+            int previousFile = piece.file;
+            int previousRank = piece.rank;
+            int previousSupport = piece.support;
             if (piece.isOffBoard)
             {
                 boardManager.FrontDeploy(piece);
+                previousFile = piece.file;
+                previousRank = piece.rank;
             }
 
+            piece.color = newColor;
+            piece.movementControllerColor = newColor;
+            piece.side = PieceSideResolver.Resolve(piece.type, piece.rank);
+            piece.lane = PieceSideResolver.ResolveLane(piece.type, piece.rank);
+            piece.support = PoliticalStatService.ClampSupport(100 - piece.support);
+            piece.isBetrayed = false;
+            piece.rebellionSuccessCount = 0;
+            piece.rebellionWeight = 0f;
             boardManager.RefreshPieceVisuals();
             EventBus.Instance.PublishRebellionTriggered(piece);
+            QaLog.Write("반란", "실제 반란 발동 기물=" + QaLog.PieceLabel(piece) + " 이전색상=" + previousColor + " 새색상=" + newColor + " 지지도=" + previousSupport + "->" + piece.support + " 누적=3->0");
+            RollAdjacentRebellions(previousColor, previousFile, previousRank, piece);
+        }
+
+        private void RollAdjacentRebellions(PieceColor targetColor, int centerFile, int centerRank, ChessPiece origin)
+        {
+            BoardState state = boardManager.BoardState;
+            for (int file = centerFile - 1; file <= centerFile + 1; file++)
+            {
+                for (int rank = centerRank - 1; rank <= centerRank + 1; rank++)
+                {
+                    if (!state.IsInBounds(file, rank))
+                    {
+                        continue;
+                    }
+
+                    ChessPiece neighbor = state.GetPiece(file, rank);
+                    if (neighbor == null || neighbor == origin || neighbor.color != targetColor)
+                    {
+                        continue;
+                    }
+
+                    QaLog.Write("반란", "주변 연쇄 판정 대상=" + QaLog.PieceLabel(neighbor) + " 시작점=" + QaLog.PieceLabel(origin) + " 중심=(" + centerFile + "," + centerRank + ")");
+                    RollImmediateRebellion(neighbor);
+                }
+            }
+        }
+
+        private PieceColor GetOpponent(PieceColor color)
+        {
+            if (color == PieceColor.White)
+            {
+                return PieceColor.Black;
+            }
+
+            if (color == PieceColor.Black)
+            {
+                return PieceColor.White;
+            }
+
+            return PieceColor.None;
         }
 
         public static float GetDefectionChance(ChessPiece piece, BoardState state)

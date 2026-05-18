@@ -19,7 +19,9 @@ namespace MMBGame
             }
 
             PoliticalStatService.ChangeSupport(targetPiece, 30, ActionName);
+            int beforeGoldPerTurn = actor.goldPerTurn;
             actor.goldPerTurn += targetPiece.taxPerTurn * 2;
+            QaLog.Write("턴수입", "변경 행동=" + ActionName + " 색상=" + actor.color + " 변화량=" + (targetPiece.taxPerTurn * 2) + " 이전=" + beforeGoldPerTurn + " 이후=" + actor.goldPerTurn + " 대상=" + QaLog.PieceLabel(targetPiece));
             return true;
         }
     }
@@ -43,7 +45,9 @@ namespace MMBGame
             }
 
             PoliticalStatService.ChangeSupport(targetPiece, -50, ActionName);
+            int beforeGoldPerTurn = actor.goldPerTurn;
             actor.goldPerTurn -= targetPiece.taxPerTurn * 2;
+            QaLog.Write("턴수입", "변경 행동=" + ActionName + " 색상=" + actor.color + " 변화량=" + (-targetPiece.taxPerTurn * 2) + " 이전=" + beforeGoldPerTurn + " 이후=" + actor.goldPerTurn + " 대상=" + QaLog.PieceLabel(targetPiece));
             return true;
         }
     }

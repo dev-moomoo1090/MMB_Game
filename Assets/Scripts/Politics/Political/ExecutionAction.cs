@@ -10,7 +10,7 @@ namespace MMBGame
 
         public override bool Execute(ChessPiece target, PieceColor actorColor, PoliticalManager manager, int value)
         {
-            if (target.color != actorColor)
+            if (target == null || manager == null || manager.BoardManager == null || target.color != actorColor)
             {
                 return false;
             }
@@ -57,6 +57,11 @@ namespace MMBGame
             {
                 TrySummonExecutionPawn(state, actorColor, summonFile, summonRank);
                 manager.BoardManager.RefreshPieceVisuals();
+            }
+
+            if (target.type == PieceType.King)
+            {
+                manager.BoardManager.TryEndGameByKingCapture(actorColor == PieceColor.White ? PieceColor.Black : PieceColor.White);
             }
 
             return true;

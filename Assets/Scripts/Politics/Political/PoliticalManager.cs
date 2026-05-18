@@ -92,6 +92,7 @@ namespace MMBGame
 
         public bool ExecutePoliticalAction(string actionName, ChessPiece target, PieceColor actorColor, int value = 0)
         {
+            QaLog.Write("행동", "정치 행동 시도 행동=" + actionName + " 색상=" + actorColor + " 입력값=" + value + " 대상=" + QaLog.PieceLabel(target));
             LastFailureReason = null;
             PoliticalAction action = null;
             for (int i = 0; i < politicalActions.Count; i++)
@@ -105,22 +106,26 @@ namespace MMBGame
 
             if (action == null)
             {
+                QaLog.Write("행동", "정치 행동 실패 행동=" + actionName + " 사유=행동없음");
                 return false;
             }
 
             if (IsIsolationBlocking(actionName))
             {
                 LastFailureReason = "쇄국 중에는 상대에게 영향을 주는 정치행동을 사용할 수 없습니다.";
+                QaLog.Write("행동", "정치 행동 실패 행동=" + actionName + " 사유=쇄국차단");
                 return false;
             }
 
             if (action.RequiresPieceSelection && target == null)
             {
+                QaLog.Write("행동", "정치 행동 실패 행동=" + actionName + " 사유=대상필요");
                 return false;
             }
 
             if (action.RequiresValueInput && value <= 0)
             {
+                QaLog.Write("행동", "정치 행동 실패 행동=" + actionName + " 사유=입력값필요 입력값=" + value);
                 return false;
             }
 
@@ -128,6 +133,10 @@ namespace MMBGame
             if (result)
             {
                 EventBus.Instance.PublishActionExecuted(actorColor, actionName);
+            }
+            else
+            {
+                QaLog.Write("행동", "정치 행동 실패 행동=" + actionName + " 사유=실행결과실패");
             }
 
             return result;

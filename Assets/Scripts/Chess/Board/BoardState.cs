@@ -104,6 +104,32 @@ namespace MMBGame
             return positionHistory.TryGetValue(key, out int count) && count >= 3;
         }
 
+        public bool HasKing(PieceColor color)
+        {
+            for (int file = 0; file < 8; file++)
+            {
+                for (int rank = 0; rank < 8; rank++)
+                {
+                    ChessPiece piece = GetPiece(file, rank);
+                    if (piece != null && piece.color == color && piece.type == PieceType.King)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            for (int i = 0; i < offBoardPieces.Count; i++)
+            {
+                ChessPiece piece = offBoardPieces[i];
+                if (piece != null && piece.color == color && piece.type == PieceType.King)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public List<ChessPiece> GetAllPieces()
         {
             List<ChessPiece> pieces = new List<ChessPiece>();

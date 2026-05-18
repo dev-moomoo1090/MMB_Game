@@ -6,6 +6,10 @@ namespace MMBGame
         {
             var piece = state.GetPiece(move.fromFile, move.fromRank);
             if (piece == null) return;
+            ChessPiece captured = move.specialMove == SpecialMoveType.EnPassant
+                ? state.GetPiece(move.toFile, move.fromRank)
+                : state.GetPiece(move.toFile, move.toRank);
+            QaLog.Write("행마", "행마 적용 기물=" + QaLog.PieceLabel(piece) + " 출발=(" + move.fromFile + "," + move.fromRank + ") 도착=(" + move.toFile + "," + move.toRank + ") 특수수=" + move.specialMove + " 승격=" + move.promotionPiece + " 포획=" + QaLog.PieceLabel(captured));
             state.enPassantAvailable = false;
             UpdateCastlingRights(state, piece, move);
             state.squares[move.fromFile, move.fromRank].piece = null;

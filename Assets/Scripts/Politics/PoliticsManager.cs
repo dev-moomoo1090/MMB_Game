@@ -59,8 +59,10 @@ namespace MMBGame
 
         public bool ExecuteFiscalAction(string actionName, ChessPiece target, int value)
         {
+            QaLog.Write("행동", "재정 행동 시도 행동=" + actionName + " 색상=" + currentTurnColor + " 입력값=" + value + " 대상=" + QaLog.PieceLabel(target));
             if (fiscalActions == null)
             {
+                QaLog.Write("행동", "재정 행동 실패 행동=" + actionName + " 사유=재정행동목록없음");
                 return false;
             }
 
@@ -76,16 +78,19 @@ namespace MMBGame
 
             if (action == null)
             {
+                QaLog.Write("행동", "재정 행동 실패 행동=" + actionName + " 사유=행동없음");
                 return false;
             }
 
             if (action.RequiresPieceSelection && target == null)
             {
+                QaLog.Write("행동", "재정 행동 실패 행동=" + actionName + " 사유=대상필요");
                 return false;
             }
 
             if (target != null && target.color != currentTurnColor)
             {
+                QaLog.Write("행동", "재정 행동 실패 행동=" + actionName + " 사유=대상색상불일치 대상색상=" + target.color + " 현재색상=" + currentTurnColor);
                 return false;
             }
 
@@ -96,6 +101,10 @@ namespace MMBGame
             {
                 LastFiscalActionResultText = BuildFiscalResultText(actionName, actor, target, before, value);
                 EventBus.Instance.PublishActionExecuted(currentTurnColor, actionName);
+            }
+            else
+            {
+                QaLog.Write("행동", "재정 행동 실패 행동=" + actionName + " 사유=실행결과실패");
             }
 
             return result;

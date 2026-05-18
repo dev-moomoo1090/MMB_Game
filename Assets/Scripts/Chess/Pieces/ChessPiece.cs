@@ -179,8 +179,19 @@ namespace MMBGame
 
         public void ResetTurnModifiers()
         {
+            int beforeTaxModifier = taxModifier;
+            float beforeRebellionWeight = rebellionWeight;
             taxModifier = 1;
             rebellionWeight = 0f;
+            if (beforeTaxModifier != taxModifier)
+            {
+                QaLog.Write("세금", "세금 배율 초기화 기물=" + QaLog.PieceLabel(this) + " 이전=" + beforeTaxModifier + " 이후=" + taxModifier);
+            }
+
+            if (!UnityEngine.Mathf.Approximately(beforeRebellionWeight, rebellionWeight))
+            {
+                QaLog.Write("기물가중치", "반란 가중치 초기화 기물=" + QaLog.PieceLabel(this) + " 이전=" + beforeRebellionWeight + " 이후=" + rebellionWeight);
+            }
         }
 
         private void RestoreOneTimePatterns()

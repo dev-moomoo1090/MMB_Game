@@ -70,12 +70,19 @@ namespace MMBGame.AI
 
         private bool AcceptanceCheck(ChessPiece piece)
         {
-            if (_ctx.IsDictatorship(_side)) return true;
+            if (_ctx.IsDictatorship(_side))
+            {
+                QaLog.Write("AI", "독재 상태라 수락 자동 성공 진영=" + _side + " 기물=" + QaLog.PieceLabel(piece));
+                return true;
+            }
 
             float rate = piece.support / 100f + piece.acceptWeight / 100f;
             if (_ctx.IsBenevolent(_side)) rate += 0.1f;
             rate = Mathf.Clamp(rate, 0.05f, 0.99f);
-            return Random.value < rate;
+            float roll = Random.value;
+            bool accepted = roll < rate;
+            QaLog.Write("AI", (accepted ? "수락 성공" : "수락 실패") + " 진영=" + _side + " 기물=" + QaLog.PieceLabel(piece) + " 공식=지지도/100(" + piece.support + "/100)+수락가중치/100(" + piece.acceptWeight + "/100)+성군보정(" + (_ctx.IsBenevolent(_side) ? 0.1f : 0f) + ") 보정확률=" + rate + " 굴림=" + roll);
+            return accepted;
         }
     }
 }

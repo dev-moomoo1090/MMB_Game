@@ -21,9 +21,8 @@ namespace MMBGame.AI
             // 2. 위치 테이블 적용
             score += GetPositionTableValue(piece.type, move.toFile, move.toRank, aiSide);
 
-            // 3. 체크메이트 판정
-            var enemyMoves = MoveValidator.GetAllLegalMoves(sim, enemy);
-            if (enemyMoves.Count == 0 && CheckDetector.IsInCheck(sim, enemy))
+            // 3. 왕 포획 판정
+            if (!sim.HasKing(enemy))
                 return 100000f;
 
             // 4. 체크 부여 보너스

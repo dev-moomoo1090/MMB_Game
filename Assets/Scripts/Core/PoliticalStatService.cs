@@ -36,6 +36,7 @@ namespace MMBGame
             int before = piece.support;
             piece.support = ClampSupport(piece.support + appliedDelta);
             int actualDelta = piece.support - before;
+            QaLog.Write("지지도", "변경 사유=" + reason + " 기물=" + QaLog.PieceLabel(piece) + " 행동자=" + actorColor + " 정치행동=" + isPoliticalAction + " 요청변화=" + delta + " 적용변화=" + appliedDelta + " 실제변화=" + actualDelta + " 이전=" + before + " 이후=" + piece.support);
             if (actualDelta != 0)
             {
                 EventBus.Instance.PublishSupportChanged(piece, actualDelta, reason);
@@ -49,7 +50,9 @@ namespace MMBGame
                 return;
             }
 
+            int before = piece.support;
             piece.support = ClampSupport(value);
+            QaLog.Write("지지도", "설정 기물=" + QaLog.PieceLabel(piece) + " 요청값=" + value + " 이전=" + before + " 이후=" + piece.support);
         }
 
         public static int ClampSupport(int value)

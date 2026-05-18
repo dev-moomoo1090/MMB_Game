@@ -8,19 +8,7 @@ namespace MMBGame
         {
             var piece = state.GetPiece(file, rank);
             if (piece == null) return new List<Move>();
-            var pseudoMoves = MoveGenerator.GeneratePseudoLegalMoves(state, file, rank);
-            var legalMoves = new List<Move>();
-            foreach (var move in pseudoMoves)
-            {
-                if (move.specialMove == SpecialMoveType.CastleKingside || move.specialMove == SpecialMoveType.CastleQueenside)
-                {
-                    if (IsLegalCastle(state, move, piece)) legalMoves.Add(move);
-                    continue;
-                }
-                var sim = SimulateMove(state, move);
-                if (!CheckDetector.IsInCheck(sim, piece.GetMovementControllerColor())) legalMoves.Add(move);
-            }
-            return legalMoves;
+            return MoveGenerator.GeneratePseudoLegalMoves(state, file, rank);
         }
 
         public static List<Move> GetAllLegalMoves(BoardState state, PieceColor color)
@@ -42,17 +30,5 @@ namespace MMBGame
             return sim;
         }
 
-        private static bool IsLegalCastle(BoardState state, Move move, ChessPiece king)
-        {
-            PieceColor moveColor = king.GetMovementControllerColor();
-            if (CheckDetector.IsInCheck(state, moveColor)) return false;
-            PieceColor enemy = moveColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
-            int file = king.file;
-            if (move.specialMove == SpecialMoveType.CastleKingside)
-                return !CheckDetector.IsSquareAttacked(state, file, 5, enemy)
-                    && !CheckDetector.IsSquareAttacked(state, file, 6, enemy);
-            return !CheckDetector.IsSquareAttacked(state, file, 3, enemy)
-                && !CheckDetector.IsSquareAttacked(state, file, 2, enemy);
-        }
     }
 }

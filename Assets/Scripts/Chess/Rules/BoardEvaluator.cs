@@ -1,101 +1,28 @@
+using System.Collections.Generic;
+
 namespace MMBGame
 {
     public static class BoardEvaluator
     {
         public static int CountAttackers(BoardState state, int file, int rank, PieceColor byColor)
         {
+            if (state == null || byColor == PieceColor.None || !state.IsInBounds(file, rank))
+            {
+                return 0;
+            }
+
             int count = 0;
-            int pawnDirection = byColor == PieceColor.White ? 1 : -1;
-
-            for (int fileOffset = -1; fileOffset <= 1; fileOffset += 2)
+            for (int currentFile = 0; currentFile < 8; currentFile++)
             {
-                ChessPiece piece = state.GetPiece(file + fileOffset, rank - pawnDirection);
-                if (piece != null && piece.color == byColor && piece.type == PieceType.Pawn)
-                {
-                    count++;
-                }
-            }
-
-            int[][] knightLeaps = new int[][]
-            {
-                new int[] { 1, 2 }, new int[] { 2, 1 }, new int[] { 2, -1 }, new int[] { 1, -2 },
-                new int[] { -1, -2 }, new int[] { -2, -1 }, new int[] { -2, 1 }, new int[] { -1, 2 }
-            };
-
-            foreach (int[] leap in knightLeaps)
-            {
-                ChessPiece piece = state.GetPiece(file + leap[0], rank + leap[1]);
-                if (piece != null && piece.color == byColor && piece.type == PieceType.Knight)
-                {
-                    count++;
-                }
-            }
-
-            int[][] straightDirections = new int[][]
-            {
-                new int[] { 1, 0 }, new int[] { -1, 0 }, new int[] { 0, 1 }, new int[] { 0, -1 }
-            };
-
-            foreach (int[] direction in straightDirections)
-            {
-                int currentFile = file + direction[0];
-                int currentRank = rank + direction[1];
-
-                while (state.IsInBounds(currentFile, currentRank))
+                for (int currentRank = 0; currentRank < 8; currentRank++)
                 {
                     ChessPiece piece = state.GetPiece(currentFile, currentRank);
-                    if (piece != null)
-                    {
-                        if (piece.color == byColor && (piece.type == PieceType.Rook || piece.type == PieceType.Queen))
-                        {
-                            count++;
-                        }
-                        break;
-                    }
-
-                    currentFile += direction[0];
-                    currentRank += direction[1];
-                }
-            }
-
-            int[][] diagonalDirections = new int[][]
-            {
-                new int[] { 1, 1 }, new int[] { 1, -1 }, new int[] { -1, 1 }, new int[] { -1, -1 }
-            };
-
-            foreach (int[] direction in diagonalDirections)
-            {
-                int currentFile = file + direction[0];
-                int currentRank = rank + direction[1];
-
-                while (state.IsInBounds(currentFile, currentRank))
-                {
-                    ChessPiece piece = state.GetPiece(currentFile, currentRank);
-                    if (piece != null)
-                    {
-                        if (piece.color == byColor && (piece.type == PieceType.Bishop || piece.type == PieceType.Queen))
-                        {
-                            count++;
-                        }
-                        break;
-                    }
-
-                    currentFile += direction[0];
-                    currentRank += direction[1];
-                }
-            }
-
-            for (int fileOffset = -1; fileOffset <= 1; fileOffset++)
-            {
-                for (int rankOffset = -1; rankOffset <= 1; rankOffset++)
-                {
-                    if (fileOffset == 0 && rankOffset == 0)
+                    if (piece == null || PieceClassifier.IsObstacle(piece) || piece.GetMovementControllerColor() != byColor)
                     {
                         continue;
                     }
 
-                    ChessPiece piece = state.GetPiece(file + fileOffset, rank + rankOffset);
-                    if (piece != null && piece.color == byColor && piece.type == PieceType.King)
+                    if (CanAttackSquare(state, piece, file, rank))
                     {
                         count++;
                     }
@@ -121,6 +48,133 @@ namespace MMBGame
                 case PieceType.Queen: return 9;
                 default: return 0;
             }
+        }
+
+        private static bool CanAttackSquare(BoardState state, ChessPiece piece, int targetFile, int targetRank)
+        {
+            if (piece.file == targetFile && piece.rank == targetRank)
+            {
+                return false;
+            }
+
+            if (piece.type == PieceType.Pawn)
+            {
+                return PawnAttacksSquare(piece, targetFile, targetRank) ||
+                    PatternsAttackSquare(state, piece, piece.oneTimeMovePatterns, targetFile, targetRank);
+            }
+
+            return PatternsAttackSquare(state, piece, piece.currentMovePatterns, targetFile, targetRank) ||
+                PatternsAttackSquare(state, piece, piece.oneTimeMovePatterns, targetFile, targetRank);
+        }
+
+        private static bool PawnAttacksSquare(ChessPiece pawn, int targetFile, int targetRank)
+        {
+            PieceColor moveColor = pawn.GetMovementControllerColor();
+            int direction = moveColor == PieceColor.White ? 1 : -1;
+            return pawn.file + direction == targetFile && (pawn.rank + 1 == targetRank || pawn.rank - 1 == targetRank);
+        }
+
+        private static bool PatternsAttackSquare(BoardState state, ChessPiece piece, List<MovePattern> patterns, int targetFile, int targetRank)
+        {
+            if (patterns == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < patterns.Count; i++)
+            {
+                MovePattern pattern = patterns[i];
+                if (pattern == null || pattern.moveOnly)
+                {
+                    continue;
+                }
+
+                if (pattern.isCannon)
+                {
+                    if (CannonPatternAttacksSquare(state, piece, pattern, targetFile, targetRank))
+                    {
+                        return true;
+                    }
+
+                    continue;
+                }
+
+                if (pattern.isSliding)
+                {
+                    if (SlidingPatternAttacksSquare(state, piece, pattern, targetFile, targetRank))
+                    {
+                        return true;
+                    }
+
+                    continue;
+                }
+
+                if (piece.file + pattern.deltaFile == targetFile && piece.rank + pattern.deltaRank == targetRank)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool SlidingPatternAttacksSquare(BoardState state, ChessPiece piece, MovePattern pattern, int targetFile, int targetRank)
+        {
+            int file = piece.file + pattern.deltaFile;
+            int rank = piece.rank + pattern.deltaRank;
+            while (state.IsInBounds(file, rank))
+            {
+                if (file == targetFile && rank == targetRank)
+                {
+                    return true;
+                }
+
+                ChessPiece blocker = state.GetPiece(file, rank);
+                if (blocker != null)
+                {
+                    return false;
+                }
+
+                file += pattern.deltaFile;
+                rank += pattern.deltaRank;
+            }
+
+            return false;
+        }
+
+        private static bool CannonPatternAttacksSquare(BoardState state, ChessPiece piece, MovePattern pattern, int targetFile, int targetRank)
+        {
+            bool jumpedPiece = false;
+            int file = piece.file + pattern.deltaFile;
+            int rank = piece.rank + pattern.deltaRank;
+            while (state.IsInBounds(file, rank))
+            {
+                ChessPiece target = state.GetPiece(file, rank);
+                if (file == targetFile && rank == targetRank)
+                {
+                    return jumpedPiece;
+                }
+
+                if (target != null)
+                {
+                    if (PieceClassifier.IsObstacle(target))
+                    {
+                        return false;
+                    }
+
+                    if (jumpedPiece)
+                    {
+                        return false;
+                    }
+
+                    jumpedPiece = true;
+                }
+
+                file += pattern.deltaFile;
+                rank += pattern.deltaRank;
+            }
+
+            return false;
         }
     }
 }

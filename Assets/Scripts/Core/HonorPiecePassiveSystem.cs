@@ -93,6 +93,11 @@ namespace MMBGame
 
         public bool TryRerollMovementRefusal(ChessPiece refusedPiece)
         {
+            return TryRerollMovementRefusal(refusedPiece, refusedPiece != null ? refusedPiece.file : -1, refusedPiece != null ? refusedPiece.rank : -1);
+        }
+
+        public bool TryRerollMovementRefusal(ChessPiece refusedPiece, int targetFile, int targetRank)
+        {
             EnsureReferences();
             if (refusedPiece == null)
             {
@@ -111,7 +116,7 @@ namespace MMBGame
                 return false;
             }
 
-            return !ObedienceSystem.RollRefusal(refusedPiece, boardManager != null ? boardManager.BoardState : null);
+            return !ObedienceSystem.RollRefusal(refusedPiece, boardManager != null ? boardManager.BoardState : null, targetFile, targetRank);
         }
 
         public void HandlePieceMoved(ChessPiece piece, BoardState state)

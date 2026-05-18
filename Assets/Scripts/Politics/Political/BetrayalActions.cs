@@ -54,7 +54,9 @@ namespace MMBGame
             }
 
             PoliticalStatService.ChangeSupportFromPoliticalAction(target, -5, actorColor, ActionName);
+            int beforeAcceptWeight = target.acceptWeight;
             target.acceptWeight += 5;
+            QaLog.Write("기물가중치", "수락 가중치 변경 행동=" + ActionName + " 기물=" + QaLog.PieceLabel(target) + " 변화량=5 이전=" + beforeAcceptWeight + " 이후=" + target.acceptWeight);
             EventBus.Instance.PublishIntelligenceGathered(target);
             return true;
         }
@@ -74,7 +76,9 @@ namespace MMBGame
             }
 
             PoliticalStatService.ChangeSupportFromPoliticalAction(target, -8, actorColor, ActionName);
+            float beforeRebellionWeight = target.rebellionWeight;
             target.rebellionWeight += 1f;
+            QaLog.Write("기물가중치", "반란 가중치 변경 행동=" + ActionName + " 기물=" + QaLog.PieceLabel(target) + " 변화량=1 이전=" + beforeRebellionWeight + " 이후=" + target.rebellionWeight);
             EventBus.Instance.PublishIntelligenceGathered(target);
             return true;
         }
@@ -110,9 +114,16 @@ namespace MMBGame
             EventBus.Instance.PublishPieceCapturePending(victim);
             SpecialMoves.ApplyMove(state, assassinationMove);
             target.ClearOneTimeMovePatterns();
+            float beforeRebellionWeight = target.rebellionWeight;
             target.rebellionWeight += 3f;
+            QaLog.Write("기물가중치", "반란 가중치 변경 행동=" + ActionName + " 기물=" + QaLog.PieceLabel(target) + " 변화량=3 이전=" + beforeRebellionWeight + " 이후=" + target.rebellionWeight);
             EventBus.Instance.PublishRebellionTriggered(target);
             manager.BoardManager.RefreshPieceVisuals();
+            if (victim.type == PieceType.King)
+            {
+                manager.BoardManager.TryEndGameByKingCapture(actorColor);
+            }
+
             return true;
         }
 

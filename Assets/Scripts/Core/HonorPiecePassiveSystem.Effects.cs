@@ -98,7 +98,9 @@ namespace MMBGame
                 return;
             }
 
+            int beforeGoldPerTurn = player.goldPerTurn;
             player.goldPerTurn += 30;
+            QaLog.Write("턴수입", "변경 행동=RookTradeOffer 색상=" + color + " 변화량=30 이전=" + beforeGoldPerTurn + " 이후=" + player.goldPerTurn);
             tradeAcceptedColors.Add(color);
         }
 
