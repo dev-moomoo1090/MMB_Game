@@ -2,6 +2,7 @@ namespace MMBGame
 {
     public class BombardAction : MilitaryAction
     {
+        /*delete this jusuck*/
         public override string ActionName => "BombardAction";
         public override bool RequiresPieceSelection => false;
         public override bool RequiresPositionSelection => true;
