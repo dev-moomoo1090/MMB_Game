@@ -103,6 +103,39 @@ namespace MMBGame
             return BoardCoordinateMapper.TryGetLogicalSquare(ResolveBoardRoot(), worldPosition, out file, out rank);
         }
 
+        public BoardPieceVisual FindVisual(int targetFile, int targetRank)
+        {
+            for (int i = 0; i < spawnedPieces.Count; i++)
+            {
+                if (spawnedPieces[i] == null)
+                {
+                    continue;
+                }
+
+                BoardPieceVisual visual = spawnedPieces[i].GetComponent<BoardPieceVisual>();
+                if (visual != null && visual.File == targetFile && visual.Rank == targetRank)
+                {
+                    return visual;
+                }
+            }
+
+            return null;
+        }
+
+        public bool TryPlayAttackMotion(int attackerFile, int attackerRank, int approachFile, int approachRank, out Coroutine coroutine)
+        {
+            BoardPieceVisual visual = FindVisual(attackerFile, attackerRank);
+            if (visual == null || !visual.HasAttackAnimation)
+            {
+                coroutine = null;
+                return false;
+            }
+
+            visual.transform.position = GetBoardPosition(approachFile, approachRank) + pieceOffset;
+            coroutine = StartCoroutine(visual.PlayAttackAnimation());
+            return true;
+        }
+
         private void SpawnPiece(ChessPiece piece, IReadOnlyList<PieceSetupDefinition> definitions)
         {
             PieceSetupDefinition definition = FindDefinition(piece, definitions);
@@ -132,7 +165,7 @@ namespace MMBGame
                     ApplySortingOrder(selectedModel);
                 }
 
-                pieceVisual.Initialize(this, piece, normalModel, selectedModel);
+                pieceVisual.Initialize(this, piece, normalModel, selectedModel, definition.attackSprites, definition.attackFrameDuration, sortingOrder, definition.attackScale);
             }
             else
             {

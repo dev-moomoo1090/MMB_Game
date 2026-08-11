@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -115,6 +116,18 @@ namespace MMBGame
                 BoardState.RecordPosition();
                 HonorPiecePassiveSystem.Instance?.HandlePieceMoved(piece, BoardState);
                 refusedMoveKeys.Clear();
+
+                if (capturedPiece != null)
+                {
+                    int approachFile = toFile - System.Math.Sign(toFile - fromFile);
+                    int approachRank = toRank - System.Math.Sign(toRank - fromRank);
+                    if (pieceSetupManager.TryPlayAttackMotion(fromFile, fromRank, approachFile, approachRank, out Coroutine attackMotion))
+                    {
+                        StartCoroutine(FinishMoveAfterAttackMotion(attackMotion));
+                        return true;
+                    }
+                }
+
                 RefreshPieceVisuals();
                 AdvanceTurnAfterMove();
                 return true;
@@ -200,6 +213,13 @@ namespace MMBGame
             BoardState.offBoardPieces.Remove(piece);
             RefreshPieceVisuals();
             return true;
+        }
+
+        private IEnumerator FinishMoveAfterAttackMotion(Coroutine attackMotion)
+        {
+            yield return attackMotion;
+            RefreshPieceVisuals();
+            AdvanceTurnAfterMove();
         }
 
         private ChessPiece GetCapturedPiece(Move move)

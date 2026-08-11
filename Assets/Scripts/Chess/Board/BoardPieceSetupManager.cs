@@ -82,6 +82,18 @@ namespace MMBGame
             }
         }
 
+        public bool TryPlayAttackMotion(int attackerFile, int attackerRank, int approachFile, int approachRank, out Coroutine coroutine)
+        {
+            EnsureVisuals();
+            if (pieceVisuals != null)
+            {
+                return pieceVisuals.TryPlayAttackMotion(attackerFile, attackerRank, approachFile, approachRank, out coroutine);
+            }
+
+            coroutine = null;
+            return false;
+        }
+
         public PieceSetupDefinition GetPieceDefinition(PieceColor color, PieceSide side, PieceType type, PieceLane lane = PieceLane.None)
         {
             PieceSetupDefinition sideDefinition = null;

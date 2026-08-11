@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace MMBGame
@@ -12,6 +13,12 @@ namespace MMBGame
         private Sprite selectedSprite;
         private GameObject normalModel;
         private GameObject selectedModel;
+        private GameObject attackModel;
+        private Sprite[] attackSprites;
+        private float attackFrameDuration = 0.1f;
+        private int sortingOrder;
+        private float attackScale = 1f;
+        private bool isAttacking;
         private int file;
         private int rank;
         private ChessPiece piece;
@@ -19,6 +26,7 @@ namespace MMBGame
         public int File => file;
         public int Rank => rank;
         public ChessPiece Piece => piece;
+        public bool HasAttackAnimation => attackSprites != null && attackSprites.Length > 0;
 
         public void Initialize(BoardPieceVisuals newOwner, ChessPiece newPiece, Sprite newNormalSprite, Sprite newSelectedSprite)
         {
@@ -33,7 +41,7 @@ namespace MMBGame
             FitColliderToSprite();
         }
 
-        public void Initialize(BoardPieceVisuals newOwner, ChessPiece newPiece, GameObject newNormalModel, GameObject newSelectedModel)
+        public void Initialize(BoardPieceVisuals newOwner, ChessPiece newPiece, GameObject newNormalModel, GameObject newSelectedModel, Sprite[] newAttackSprites = null, float newAttackFrameDuration = 0.1f, int newSortingOrder = 20, float newAttackScale = 1f)
         {
             owner = newOwner;
             piece = newPiece;
@@ -41,12 +49,74 @@ namespace MMBGame
             rank = newPiece.rank;
             normalModel = newNormalModel;
             selectedModel = newSelectedModel;
+            attackSprites = newAttackSprites;
+            attackFrameDuration = newAttackFrameDuration;
+            sortingOrder = newSortingOrder;
+            attackScale = newAttackScale;
             SetSelected(false);
             FitColliderToChildren();
         }
 
+        public IEnumerator PlayAttackAnimation()
+        {
+            if (!HasAttackAnimation)
+            {
+                yield break;
+            }
+
+            isAttacking = true;
+            EnsureAttackModel();
+            if (normalModel != null) normalModel.SetActive(false);
+            if (selectedModel != null) selectedModel.SetActive(false);
+            attackModel.SetActive(true);
+
+            SpriteRenderer attackRenderer = attackModel.GetComponent<SpriteRenderer>();
+            for (int i = 0; i < attackSprites.Length; i++)
+            {
+                attackRenderer.sprite = attackSprites[i];
+                AlignAttackSprite(attackRenderer);
+                yield return new WaitForSeconds(attackFrameDuration);
+            }
+
+            attackModel.SetActive(false);
+            isAttacking = false;
+            if (normalModel != null) normalModel.SetActive(true);
+        }
+
+        private void EnsureAttackModel()
+        {
+            if (attackModel != null)
+            {
+                return;
+            }
+
+            attackModel = new GameObject("Attack");
+            attackModel.transform.SetParent(transform, false);
+            attackModel.transform.localScale = Vector3.one * attackScale;
+            SpriteRenderer renderer = attackModel.AddComponent<SpriteRenderer>();
+            renderer.sortingOrder = sortingOrder;
+            attackModel.SetActive(false);
+        }
+
+        private void AlignAttackSprite(SpriteRenderer renderer)
+        {
+            if (renderer.sprite == null)
+            {
+                return;
+            }
+
+            Bounds bounds = renderer.localBounds;
+            Vector3 offset = Vector3.Scale(new Vector3(bounds.center.x, bounds.min.y, 0f), renderer.transform.localScale);
+            renderer.transform.localPosition = -offset;
+        }
+
         public void SetSelected(bool selected)
         {
+            if (isAttacking)
+            {
+                return;
+            }
+
             if (normalModel != null || selectedModel != null)
             {
                 if (normalModel != null)

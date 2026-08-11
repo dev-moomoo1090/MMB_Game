@@ -179,6 +179,9 @@ namespace MMBGame
             target.selectedPrefab = source.selectedPrefab;
             target.sprite = source.sprite;
             target.selectedSprite = source.selectedSprite;
+            target.attackSprites = source.attackSprites;
+            target.attackFrameDuration = source.attackFrameDuration;
+            target.attackScale = source.attackScale;
         }
 
         private static List<MovePattern> CreatePatterns(PieceColor color, PieceType type)
